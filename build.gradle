@@ -3,30 +3,31 @@ plugins {
 }
 
 group 'org.ic4j'
-version '0.6.17'
+version '0.6.17-BETA1'
 
-sourceCompatibility = 1.8
+sourceCompatibility = 11
 
 repositories {
     mavenCentral()
 }
 
+
 jar {
     manifest {
-        attributes('Implementation-Title': 'ic4j-internetidentity',
+        attributes('Implementation-Title': 'ic4j-camel',
                    'Implementation-Version': project.version)
     }
     
-    archiveBaseName = 'ic4j-internetidentity'
+    archiveBaseName = 'ic4j-camel'
 }
 
 task fatJar(type: Jar) {
     manifest {
-        attributes('Implementation-Title': 'ic4j-internetidentity',
+        attributes('Implementation-Title': 'ic4j-camel',
                    'Implementation-Version': project.version)
     }
     
-    archiveBaseName = 'ic4j-internetidentity-with-dependencies'
+    archiveBaseName = 'ic4j-camel-with-dependencies'
     
     from { configurations.compileClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
     with jar
@@ -39,9 +40,18 @@ test {
 dependencies {
 	implementation group: 'org.ic4j', name: 'ic4j-candid', version: '0.6.17'
 	implementation group: 'org.ic4j', name: 'ic4j-agent', version: '0.6.17'	
+	implementation group: 'org.ic4j', name: 'ic4j-candid-gson', version: '0.6.17'
+	implementation group: 'org.ic4j', name: 'ic4j-java11transport', version: '0.6.17'
+	
+	// https://mvnrepository.com/artifact/com.google.code.gson/gson
+	implementation group: 'com.google.code.gson', name: 'gson', version: '2.9.1'	
+	
+	// https://mvnrepository.com/artifact/org.apache.camel/camel-core
+	implementation group: 'org.apache.camel', name: 'camel-core', version: '3.19.0'
+	
 	implementation group: 'org.slf4j', name: 'slf4j-simple', version: '2.0.3'	
 	
-		// https://mvnrepository.com/artifact/org.apache.commons/commons-lang3
+	// https://mvnrepository.com/artifact/org.apache.commons/commons-lang3
 	implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.12.0'
 
 	// https://mvnrepository.com/artifact/org.apache.httpcomponents.client5/httpclient5
@@ -61,6 +71,9 @@ dependencies {
 
 	// https://mvnrepository.com/artifact/org.bouncycastle/bcpkix-jdk15on
 	implementation group: 'org.bouncycastle', name: 'bcpkix-jdk15on', version: '1.70'
+	
+	// https://mvnrepository.com/artifact/org.apache.camel/camel-test-junit5
+	testImplementation group: 'org.apache.camel', name: 'camel-test-junit5', version: '3.19.0'
 	
 	// https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-engine
 	testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.9.1'	

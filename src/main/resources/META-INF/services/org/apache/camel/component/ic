@@ -14,9 +14,4 @@
  * limitations under the License.
 */
 
-package org.ic4j.internetidentity;
-
-public final class PrepareDelegationResponse {
-	public byte[] userKey;
-	public Long timestamp;
-}
+class=org.ic4j.camel.ICComponent

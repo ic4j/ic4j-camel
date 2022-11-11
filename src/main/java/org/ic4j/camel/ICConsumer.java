@@ -14,14 +14,23 @@
  * limitations under the License.
 */
 
-package org.ic4j.internetidentity;
+package org.ic4j.camel;
 
-import org.ic4j.candid.annotations.Field;
-import org.ic4j.candid.annotations.Name;
-import org.ic4j.candid.types.Type;
+import org.apache.camel.Processor;
+import org.apache.camel.Suspendable;
+import org.apache.camel.support.DefaultConsumer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public final class WrongCode {
-    @Name("retries_left")
-    @Field(Type.NAT8)
-	public Short retriesLeft;		
+
+public class ICConsumer extends DefaultConsumer implements Suspendable {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(ICConsumer.class);
+	private ICEndpoint endpoint;
+
+	public ICConsumer(ICEndpoint endpoint, Processor processor) {
+        super(endpoint, processor);
+        this.endpoint = endpoint;
+	}
+
 }
