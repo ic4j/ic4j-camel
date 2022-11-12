@@ -221,13 +221,19 @@ public class ICService {
 	
 									
 						} else {
-							Class<?> responseClass = null;
-	
-							if (responseClass != null) {
-								exchange.getMessage().setBody(outArgs.getArgs().get(0).getValue(objectDeserializer,
-											responseClass));
-							} else
-								exchange.getMessage().setBody(outArgs.getArgs().get(0).getValue());
+							try
+							{
+								Class<?> responseClass = this.getOutClass();
+		
+								if (responseClass != null) {
+									exchange.getMessage().setBody(outArgs.getArgs().get(0).getValue(objectDeserializer,
+												responseClass));
+								} else
+									exchange.getMessage().setBody(outArgs.getArgs().get(0).getValue());
+								
+							} catch (ClassNotFoundException e) {
+								exchange.setException(e);
+							}
 						}
 						
 					} 

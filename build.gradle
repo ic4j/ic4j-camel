@@ -3,7 +3,7 @@ plugins {
 }
 
 group 'org.ic4j'
-version '0.6.17-BETA1'
+version '0.6.17-BETA2'
 
 sourceCompatibility = 11
 

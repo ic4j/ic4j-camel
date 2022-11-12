@@ -97,7 +97,13 @@ public final class CamelTest extends CamelTestSupport {
 
 	        template.sendBody("direct:pojo", pojoValue);        
 
-	        assertMockEndpointsSatisfied();		
+	        assertMockEndpointsSatisfied();	
+	        
+	        getMockEndpoint("mock:updatepojo").expectedBodiesReceived(pojoValue);
+
+	        template.sendBody("direct:updatepojo", pojoValue);        
+
+	        assertMockEndpointsSatisfied();		        
 	        
 		    JAXBContext context = JAXBContext.newInstance(JAXBPojo.class);
 		    JAXBPojo pojoJAXBValue =  (JAXBPojo) context.createUnmarshaller()		
@@ -166,6 +172,8 @@ public final class CamelTest extends CamelTestSupport {
            	
             	from("direct:pojo").to("ic:query?url=" + icLocation + "&method=echoPojo&canisterId=" + icCanister + "&outClass=org.ic4j.camel.test.Pojo").to("mock:pojo");
 
+            	from("direct:updatepojo").to("ic:update?url=" + icLocation + "&method=updatePojo&canisterId=" + icCanister + "&outClass=org.ic4j.camel.test.Pojo").to("mock:updatepojo");
+            	
             	from("direct:jaxb").to("ic:query?url=" + icLocation + "&method=echoPojo&canisterId=" + icCanister + "&inType=jaxb&outType=jaxb&outClass=org.ic4j.camel.test.JAXBPojo").to("mock:jaxb");
 
                	from("direct:jackson").to("ic:query?url=" + icLocation + "&method=echoPojo&canisterId=" + icCanister + "&inType=jackson&outClass=org.ic4j.camel.test.JacksonPojo").to("mock:jackson");           	
