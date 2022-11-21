@@ -91,9 +91,11 @@ actor {
      public shared query func echoComplexPojo( value : ComplexEntry) : async ComplexEntry {
         return value;
     };
+    
     public shared func updatePojo( value : Entry) : async Entry {
         return value;
-    };     
+    }; 
+        
     public shared func updateComplexPojo( value : ComplexEntry) : async ComplexEntry {
         return value;
     };    
@@ -109,6 +111,7 @@ actor {
      public shared query func echoComplexPojoVec( value : [ComplexEntry]) : async [ComplexEntry] {
         return value;
     }; 
+    
      public shared query func echoComplexArrayPojo( value : ComplexArrayEntry) : async ComplexArrayEntry {
         return value;
     }; 

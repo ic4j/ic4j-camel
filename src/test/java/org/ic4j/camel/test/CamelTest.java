@@ -74,9 +74,9 @@ public final class CamelTest extends CamelTestSupport {
 
 	        assertMockEndpointsSatisfied();	
 	        
-	        getMockEndpoint("mock:java").expectedBodiesReceived("World");
+	        getMockEndpoint("mock:apache").expectedBodiesReceived("World");
 
-	        template.sendBody("direct:java", null);        
+	        template.sendBody("direct:apache", null);        
 
 	        assertMockEndpointsSatisfied();	
 	        
@@ -164,7 +164,7 @@ public final class CamelTest extends CamelTestSupport {
  
             	from("direct:okhttp").to("ic:query?url=" + icLocation + "&method=getName&transportType=okhttp&canisterId=" + icCanister).to("mock:okhttp");
 
-            	from("direct:java").to("ic:query?url=" + icLocation + "&method=getName&transportType=java&canisterId=" + icCanister).to("mock:java");            	
+            	from("direct:apache").to("ic:query?url=" + icLocation + "&method=getName&transportType=apache&canisterId=" + icCanister).to("mock:apache");            	
 
             	from("direct:basic").to("ic:query?url=" + icLocation + "&method=getName&identityType=basic&pemFile=" + ED25519_IDENTITY_FILE + "&canisterId=" + icCanister).to("mock:basic");            	
 

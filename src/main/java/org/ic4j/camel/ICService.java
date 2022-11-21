@@ -76,9 +76,13 @@ public class ICService {
 	
 	private Agent agent;
 	
+	private int waiterTimeout = WAITER_TIMEOUT;
+	private int waiterSleep = WAITER_SLEEP;
+	
 
 	public ICService(ICEndpoint endpoint) {
 		this.endpoint = endpoint;
+		
 		
 		Security.addProvider(new BouncyCastleProvider());
 		
@@ -95,11 +99,11 @@ public class ICService {
 		case "okhttp":
 			transport = ReplicaOkHttpTransport.create(url);
 			break;
-		case "java":
-			transport = ReplicaJavaHttpTransport.create(url);
+		case "apache":
+			transport = ReplicaApacheHttpTransport.create(url);		
 			break;
 		default:
-			transport = ReplicaApacheHttpTransport.create(url);
+			transport = ReplicaJavaHttpTransport.create(url);
 			break;
 		}
 		
@@ -129,8 +133,18 @@ public class ICService {
 		}
 			
 		
-		this.agent = new AgentBuilder().transport(transport).identity(identity).nonceFactory(new NonceFactory())
-				.build();
+		if(endpoint.getIngressExpiryDuration() == null)
+			this.agent = new AgentBuilder().transport(transport).identity(identity).nonceFactory(new NonceFactory())
+					.build();
+		else
+			this.agent = new AgentBuilder().transport(transport).identity(identity).nonceFactory(new NonceFactory()).ingresExpiry(endpoint.getIngressExpiryDuration())
+			.build();	
+		
+		if(endpoint.getWaiterTimeout() != null)
+			this.waiterTimeout = endpoint.getWaiterTimeout();
+		
+		if(endpoint.getWaiterSleep() != null)
+			this.waiterSleep = endpoint.getWaiterSleep();		
 		
 		} catch (Exception e) {
 			LOG.error(e.getLocalizedMessage(), e);
@@ -166,7 +180,7 @@ public class ICService {
 		
 		IDLArgs idlArgs = IDLArgs.create(candidArgs);
 		
-		Waiter waiter = Waiter.create(WAITER_TIMEOUT, WAITER_SLEEP);
+		Waiter waiter = Waiter.create(this.waiterTimeout, this.waiterSleep);
 		
 		byte[] buf = idlArgs.toBytes();
 

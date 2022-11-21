@@ -16,6 +16,8 @@
 
 package org.ic4j.camel;
 
+import java.time.Duration;
+
 import org.apache.camel.Category;
 import org.apache.camel.Consumer;
 import org.apache.camel.Processor;
@@ -36,53 +38,67 @@ public class ICEndpoint extends DefaultEndpoint {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(ICEndpoint.class);
 	
-	@UriPath(label = "common")
-	@Metadata(defaultValue = "update", enums = "query,update", description = "The kind of operation to use",required = true)
+	@UriPath(label = "common", defaultValue = "update", enums = "query,update")
+	@Metadata(description = "The type of IC operation to use",required = true)
     private String methodType;
 	
 	@UriParam(label = "common")
-	@Metadata(required = true)
+	@Metadata(description = "Set the URL of the Agent", required = true)
     private String url;	
 	
 	@UriParam(label = "common")
-	@Metadata(defaultValue = "anonymous", enums = "anonymous,basic,secp256k1", description = "The kind of identity to use",required = false)
+    @Metadata(description = "The name of the canister method being called", required = true)
+    private String method; 		
+	
+	@UriParam(label = "common", enums = "anonymous,basic,secp256k1")
+	@Metadata(description = "The type of identity to use",required = false)
     private String identityType = "anonymous"; 
-	@UriParam(label = "common")
-	@Metadata( defaultValue = "apache", enums = "apache,java,okhttp", description = "The kind of trtansport to use",required = false)
-    private String transportType = "apache";    
-
-
-	@UriPath(label = "common")
-    @Metadata(required = true)
-    private String method; 	
+	@UriParam(label = "common", enums = "apache,java,okhttp")
+	@Metadata(description = "The type of transport to use",required = false)
+    private String transportType = "java";    
 
     @UriParam(label = "common")
-    @Metadata
+    @Metadata(description = "The principal ID of the canister being called",required = true)
     private String canisterId;  
     
     @UriParam(label = "common")
-    @Metadata
+    @Metadata(description = "The effective canister ID of the destination")
     private String effectiveCanisterId;  
     
-    @UriParam(label = "common")
-    @Metadata
+    @UriParam(label = "common", enums = "pojo,jackson,gson,dom,jaxb")
+	@Metadata(description = "Input type")
     private String inType;
-    @UriParam(label = "common")
-    @Metadata
+    @UriParam(label = "common", enums = "pojo,jackson,gson,dom,jaxb")
+    @Metadata( description = "Output type")
     private String outType;
     
     @UriParam(label = "common")
-    @Metadata
+    @Metadata( description = "Output Java class")
     private String outClass;    
     
     @UriParam(label = "common")
-    @Metadata
-    private String pemFile;     
-    
+    @Metadata(description = "Identity PEM file location")
+    private String pemFile;   
+
     @UriParam(label = "common")
+    @Metadata(description = "The Unix timestamp that the request will expire at")    
+    private Duration ingressExpiryDuration;
+    
+	// Wait for specified amount of time
+    @UriParam(label = "common")
+    @Metadata(description = "Wait for specified amount of time")     
+    private Integer waiterTimeout;
+	
+	//delay between two retries
+    @UriParam(label = "common")
+    @Metadata(description = "Delay between two retries") 	
+	private Integer waiterSleep;    
+    
+    
+    //Set a Replica transport to talk to serve as the replica interface.
     private ReplicaTransport transport;
     
-    @UriParam(label = "common")
+    //Add an identity provider for signing messages. 
     private Identity identity;  
     
     public ICEndpoint(String uri, ICComponent component, String method, String canisterId, String effectiveCanisterId,
@@ -319,6 +335,30 @@ public class ICEndpoint extends DefaultEndpoint {
 	 */
 	public void setOutClass(String outClass) {
 		this.outClass = outClass;
+	}
+
+	public Duration getIngressExpiryDuration() {
+		return ingressExpiryDuration;
+	}
+
+	public void setIngressExpiryDuration(Duration ingressExpiryDuration) {
+		this.ingressExpiryDuration = ingressExpiryDuration;
+	}
+
+	public Integer getWaiterTimeout() {
+		return waiterTimeout;
+	}
+
+	public void setWaiterTimeout(Integer waiterTimeout) {
+		this.waiterTimeout = waiterTimeout;
+	}
+
+	public Integer getWaiterSleep() {
+		return waiterSleep;
+	}
+
+	public void setWaiterSleep(Integer waiterSleep) {
+		this.waiterSleep = waiterSleep;
 	}
 	
 	
