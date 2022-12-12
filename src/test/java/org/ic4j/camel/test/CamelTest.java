@@ -61,6 +61,12 @@ public final class CamelTest extends CamelTestSupport {
 	        template.sendBody("direct:update", "World");        
 
 	        assertMockEndpointsSatisfied();	
+	        
+	        getMockEndpoint("mock:loadidl").expectedBodiesReceived("Hello, World!");
+
+	        template.sendBody("direct:loadidl", "World");        
+
+	        assertMockEndpointsSatisfied();	        
 	
 	        getMockEndpoint("mock:query").expectedBodiesReceived("World");
 
@@ -159,6 +165,8 @@ public final class CamelTest extends CamelTestSupport {
             	//ICEndpoint endpoint = (ICEndpoint) endpoint("ic:update:https://m7sm4-2iaaa-aaaab-qabra-cai.ic0.app/?method=greet");
             	
                 from("direct:update").to("ic:update?url=" + icLocation + "&method=greet&canisterId=" + icCanister).to("mock:update");
+                
+                from("direct:loadidl").to("ic:update?url=" + icLocation + "&method=greet&loadIDL=true&canisterId=" + icCanister).to("mock:loadidl");
 
             	from("direct:query").to("ic:query?url=" + icLocation + "&method=getName&canisterId=" + icCanister).to("mock:query");
  

@@ -49,11 +49,9 @@ public class ICProducer extends DefaultAsyncProducer {
 	public boolean process(Exchange exchange, AsyncCallback callback) {
         try {
             LOG.trace("Exchange Pattern {}", exchange.getPattern());
-            if (this.getEndpoint().getMethodType().equals(ICConfiguration.QUERY_PREFIX)) {
-                return service.processQuery(exchange, callback);
-            } else {
-                return service.processUpdate(exchange, callback);
-            }
+
+            return service.process(exchange, callback);
+            
         } catch (Throwable e) {
             exchange.setException(e);
             callback.done(true);

@@ -31,14 +31,20 @@ public class ICEndpointConfigurer extends PropertyConfigurerSupport implements G
         case "exceptionHandler": target.setExceptionHandler(property(camelContext, org.apache.camel.spi.ExceptionHandler.class, value)); return true;
         case "exchangepattern":
         case "exchangePattern": target.setExchangePattern(property(camelContext, org.apache.camel.ExchangePattern.class, value)); return true;
+        case "fetchrootkey":
+        case "fetchRootKey": target.setFetchRootKey(property(camelContext, java.lang.Boolean.class, value)); return true;
         case "identitytype":
         case "identityType": target.setIdentityType(property(camelContext, java.lang.String.class, value)); return true;
+        case "idlfile":
+        case "idlFile": target.setIdlFile(property(camelContext, java.lang.String.class, value)); return true;
         case "intype":
         case "inType": target.setInType(property(camelContext, java.lang.String.class, value)); return true;
         case "ingressexpiryduration":
         case "ingressExpiryDuration": target.setIngressExpiryDuration(property(camelContext, java.time.Duration.class, value)); return true;
         case "lazystartproducer":
         case "lazyStartProducer": target.setLazyStartProducer(property(camelContext, boolean.class, value)); return true;
+        case "loadidl":
+        case "loadIDL": target.setLoadIDL(property(camelContext, java.lang.Boolean.class, value)); return true;
         case "method": target.setMethod(property(camelContext, java.lang.String.class, value)); return true;
         case "outclass":
         case "outClass": target.setOutClass(property(camelContext, java.lang.String.class, value)); return true;
@@ -70,14 +76,20 @@ public class ICEndpointConfigurer extends PropertyConfigurerSupport implements G
         case "exceptionHandler": return org.apache.camel.spi.ExceptionHandler.class;
         case "exchangepattern":
         case "exchangePattern": return org.apache.camel.ExchangePattern.class;
+        case "fetchrootkey":
+        case "fetchRootKey": return java.lang.Boolean.class;
         case "identitytype":
         case "identityType": return java.lang.String.class;
+        case "idlfile":
+        case "idlFile": return java.lang.String.class;
         case "intype":
         case "inType": return java.lang.String.class;
         case "ingressexpiryduration":
         case "ingressExpiryDuration": return java.time.Duration.class;
         case "lazystartproducer":
         case "lazyStartProducer": return boolean.class;
+        case "loadidl":
+        case "loadIDL": return java.lang.Boolean.class;
         case "method": return java.lang.String.class;
         case "outclass":
         case "outClass": return java.lang.String.class;
@@ -110,14 +122,20 @@ public class ICEndpointConfigurer extends PropertyConfigurerSupport implements G
         case "exceptionHandler": return target.getExceptionHandler();
         case "exchangepattern":
         case "exchangePattern": return target.getExchangePattern();
+        case "fetchrootkey":
+        case "fetchRootKey": return target.getFetchRootKey();
         case "identitytype":
         case "identityType": return target.getIdentityType();
+        case "idlfile":
+        case "idlFile": return target.getIdlFile();
         case "intype":
         case "inType": return target.getInType();
         case "ingressexpiryduration":
         case "ingressExpiryDuration": return target.getIngressExpiryDuration();
         case "lazystartproducer":
         case "lazyStartProducer": return target.isLazyStartProducer();
+        case "loadidl":
+        case "loadIDL": return target.getLoadIDL();
         case "method": return target.getMethod();
         case "outclass":
         case "outClass": return target.getOutClass();

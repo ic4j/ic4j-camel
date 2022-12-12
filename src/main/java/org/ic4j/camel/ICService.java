@@ -16,13 +16,11 @@
 
 package org.ic4j.camel;
 
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.Security;
-import java.util.ArrayList;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 import org.apache.camel.AsyncCallback;
 import org.apache.camel.Exchange;
@@ -30,11 +28,10 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.ic4j.agent.Agent;
 import org.ic4j.agent.AgentBuilder;
 import org.ic4j.agent.AgentError;
+import org.ic4j.agent.FuncProxy;
 import org.ic4j.agent.NonceFactory;
-import org.ic4j.agent.QueryBuilder;
+import org.ic4j.agent.ProxyBuilder;
 import org.ic4j.agent.ReplicaTransport;
-import org.ic4j.agent.Response;
-import org.ic4j.agent.UpdateBuilder;
 import org.ic4j.agent.Waiter;
 import org.ic4j.agent.http.ReplicaApacheHttpTransport;
 import org.ic4j.agent.http.ReplicaJavaHttpTransport;
@@ -43,7 +40,6 @@ import org.ic4j.agent.identity.AnonymousIdentity;
 import org.ic4j.agent.identity.BasicIdentity;
 import org.ic4j.agent.identity.Identity;
 import org.ic4j.agent.identity.Secp256k1Identity;
-import org.ic4j.agent.requestid.RequestId;
 import org.ic4j.candid.ObjectDeserializer;
 import org.ic4j.candid.ObjectSerializer;
 import org.ic4j.candid.dom.DOMDeserializer;
@@ -54,10 +50,10 @@ import org.ic4j.candid.jackson.JacksonDeserializer;
 import org.ic4j.candid.jackson.JacksonSerializer;
 import org.ic4j.candid.jaxb.JAXBDeserializer;
 import org.ic4j.candid.jaxb.JAXBSerializer;
-import org.ic4j.candid.parser.IDLArgs;
-import org.ic4j.candid.parser.IDLValue;
 import org.ic4j.candid.pojo.PojoDeserializer;
 import org.ic4j.candid.pojo.PojoSerializer;
+import org.ic4j.candid.types.Mode;
+import org.ic4j.types.Func;
 import org.ic4j.types.Principal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,6 +74,8 @@ public class ICService {
 	
 	private int waiterTimeout = WAITER_TIMEOUT;
 	private int waiterSleep = WAITER_SLEEP;
+	
+	ProxyBuilder proxyBuilder;
 	
 
 	public ICService(ICEndpoint endpoint) {
@@ -140,11 +138,16 @@ public class ICService {
 			this.agent = new AgentBuilder().transport(transport).identity(identity).nonceFactory(new NonceFactory()).ingresExpiry(endpoint.getIngressExpiryDuration())
 			.build();	
 		
+		if(endpoint.getFetchRootKey())
+			this.agent.fetchRootKey();
+		
 		if(endpoint.getWaiterTimeout() != null)
 			this.waiterTimeout = endpoint.getWaiterTimeout();
 		
 		if(endpoint.getWaiterSleep() != null)
-			this.waiterSleep = endpoint.getWaiterSleep();		
+			this.waiterSleep = endpoint.getWaiterSleep();	
+		
+		this.proxyBuilder = ProxyBuilder.create(agent);
 		
 		} catch (Exception e) {
 			LOG.error(e.getLocalizedMessage(), e);
@@ -156,204 +159,72 @@ public class ICService {
     }	
 
 
-
-	boolean processUpdate(Exchange exchange, AsyncCallback callback) {
+	boolean process(Exchange exchange, AsyncCallback callback) {
 		Principal canisterId = Principal.fromString(this.getEndpoint().getCanisterId());
 		
 		String method = this.getEndpoint().getMethod();
 		
-		UpdateBuilder updateBuilder = UpdateBuilder.create(this.agent, canisterId, method);
+		String methodType = this.getEndpoint().getMethodType();
+		
+		Waiter waiter = Waiter.create(this.waiterTimeout, this.waiterSleep);
+		this.proxyBuilder = this.proxyBuilder.waiter(waiter).disableRangeCheck(this.getEndpoint().getFetchRootKey());
 		
 		if(this.getEndpoint().getEffectiveCanisterId() != null)
-			updateBuilder = updateBuilder.effectiveCanisterId(Principal.fromString(this.getEndpoint().getEffectiveCanisterId()));
-
+		{
+			Principal effectiveCanisterId = Principal.fromString(this.getEndpoint().getEffectiveCanisterId());
+			this.proxyBuilder = this.proxyBuilder.effectiveCanisterId(effectiveCanisterId);
+		}
+		
+		if(this.getEndpoint().getIdlFile() != null)
+		{
+			Path idlFilePath = Path.of(this.getEndpoint().getIdlFile());
+			this.proxyBuilder = this.proxyBuilder.idlFile(idlFilePath);
+		}
+		
+		this.proxyBuilder = this.proxyBuilder.loadIDL(this.getEndpoint().getLoadIDL());
+		
+		Func func = new Func(canisterId, method);
+		
+		FuncProxy<?> funcProxy = this.proxyBuilder.getFuncProxy(func);
+		
 		ObjectSerializer objectSerializer = this.getSerializer();
 		ObjectDeserializer objectDeserializer = this.getDeserializer();
 		
-
-		ArrayList<IDLValue> candidArgs = new ArrayList<IDLValue>();
+		funcProxy.setSerializers(objectSerializer);
+		funcProxy.setDeserializer(objectDeserializer);
 		
-		Object arg = exchange.getIn().getBody();
-		
-		if(arg != null)
-			candidArgs.add(IDLValue.create(arg, objectSerializer));
-		
-		IDLArgs idlArgs = IDLArgs.create(candidArgs);
-		
-		Waiter waiter = Waiter.create(this.waiterTimeout, this.waiterSleep);
-		
-		byte[] buf = idlArgs.toBytes();
-
-		CompletableFuture<Response<RequestId>> requestResponse = updateBuilder.arg(buf).call(null);
-
-		RequestId requestId;
+		if(methodType != null)
+		{
+            if (methodType.equals(ICConfiguration.QUERY_PREFIX)) 
+            {
+            	Mode[] modes = {Mode.QUERY};
+            	funcProxy.setModes(modes);
+            }
+            else if (methodType.equals(ICConfiguration.ONEWAY_PREFIX))
+            {
+            	Mode[] modes = {Mode.ONEWAY};
+            	funcProxy.setModes(modes);
+            }
+            else 
+            	funcProxy.setModes(new Mode[0]);
+		}
+					
 		try {
-			requestId = requestResponse.get().getPayload();
-		} catch (ExecutionException e) {
+			funcProxy.setResponseClass(this.getOutClass());
+			Object arg = exchange.getIn().getBody();
+			Object response = funcProxy.call(arg);
+			
+			exchange.getMessage().setBody(response);
+		} catch (Exception e) {
 			if(e.getCause() != null && e.getCause() instanceof AgentError)
 				exchange.setException((AgentError)e.getCause());
 			else	
-				exchange.setException(AgentError.create(AgentError.AgentErrorCode.CUSTOM_ERROR, e, e.getLocalizedMessage()));
-			
-			callback.done(true);
-			return true;
+				exchange.setException(AgentError.create(AgentError.AgentErrorCode.CUSTOM_ERROR, e, e.getLocalizedMessage()));			
 		}
-		catch (InterruptedException e) {
-			exchange.setException(AgentError.create(AgentError.AgentErrorCode.CUSTOM_ERROR, e, e.getLocalizedMessage()));
-			
-			callback.done(true);
-			return true;
-		}					
 		
-		CompletableFuture<Response<byte[]>> builderResponse = updateBuilder.getState(
-				requestId, null, false, waiter);
-
-		try {
-			builderResponse.whenComplete((input, ex) -> {
-				if (ex == null) {
-					if (input != null) {
-						IDLArgs outArgs = IDLArgs.fromBytes(input.getPayload());
-	
-						if (outArgs.getArgs().isEmpty()) {
-	
-								Class<?> responseClass;
-								try {
-									responseClass = this.getOutClass();
-									if (responseClass != null) {
-										if (responseClass.isAssignableFrom(Void.class))
-											exchange.getMessage().setBody(null);
-										else
-											exchange.setException(
-													AgentError.create(AgentError.AgentErrorCode.CUSTOM_ERROR,
-															"Missing return value"));
-									} else
-										exchange.setException(AgentError.create(
-												AgentError.AgentErrorCode.CUSTOM_ERROR, "Missing return value"));									
-								} catch (ClassNotFoundException e) {
-									exchange.setException(e);
-								}
-	
-									
-						} else {
-							try
-							{
-								Class<?> responseClass = this.getOutClass();
-		
-								if (responseClass != null) {
-									exchange.getMessage().setBody(outArgs.getArgs().get(0).getValue(objectDeserializer,
-												responseClass));
-								} else
-									exchange.getMessage().setBody(outArgs.getArgs().get(0).getValue());
-								
-							} catch (ClassNotFoundException e) {
-								exchange.setException(e);
-							}
-						}
-						
-					} 
-				} else
-				{
-					if(ex instanceof AgentError)
-						exchange.setException(ex);
-					else
-						exchange.setException(AgentError.create(AgentError.AgentErrorCode.CUSTOM_ERROR,ex));	
-					
-				}
-				
-				callback.done(true);
-					
-			});
-		
-		}
-		catch (AgentError e) {
-			exchange.setException(e);
-			callback.done(true);
-		}
-		catch (Exception e) {
-			exchange.setException(AgentError.create(AgentError.AgentErrorCode.CUSTOM_ERROR, e, e.getLocalizedMessage()));
-			callback.done(true);
-		}
-
+		callback.done(true);
 		return true;
-	}		
-		
-
-	boolean processQuery(Exchange exchange, AsyncCallback callback) {
-		Principal canisterId = Principal.fromString(this.getEndpoint().getCanisterId());
-		
-		String method = this.getEndpoint().getMethod();
-		
-		QueryBuilder queryBuilder = QueryBuilder.create(this.agent, canisterId, method);
-		
-		if(this.getEndpoint().getEffectiveCanisterId() != null)
-			queryBuilder = queryBuilder.effectiveCanisterId(Principal.fromString(this.getEndpoint().getEffectiveCanisterId()));
-
-		ObjectSerializer objectSerializer = this.getSerializer();
-		ObjectDeserializer objectDeserializer = this.getDeserializer();		
-
-		ArrayList<IDLValue> candidArgs = new ArrayList<IDLValue>();
-		
-		Object arg = exchange.getIn().getBody();
-		
-		
-		if(arg != null)
-			candidArgs.add(IDLValue.create(arg, objectSerializer));
-		
-		IDLArgs idlArgs = IDLArgs.create(candidArgs);
-		
-		
-		byte[] buf = idlArgs.toBytes();
-
-		CompletableFuture<Response<byte[]>> builderResponse = queryBuilder.arg(buf).call(null);
-
-		try {
-				builderResponse.whenComplete((input, ex) -> {
-					if (ex == null) {
-						if (input != null) {
-							IDLArgs outArgs = IDLArgs.fromBytes(input.getPayload());
-
-							if (outArgs.getArgs().isEmpty())
-								exchange.setException(AgentError.create(
-										AgentError.AgentErrorCode.CUSTOM_ERROR, "Missing return value"));
-							else {
-								Class<?> responseClass;
-								try {
-									responseClass = this.getOutClass();
-									
-									if (responseClass != null) {
-
-										exchange.getMessage().setBody(outArgs.getArgs().get(0)
-													.getValue(objectDeserializer, responseClass));
-									} else
-										exchange.getMessage().setBody(outArgs.getArgs().get(0).getValue());
-								} catch (ClassNotFoundException e) {
-									exchange.setException(e);
-								}
-							}
-						} else
-							exchange.setException(AgentError.create(
-									AgentError.AgentErrorCode.CUSTOM_ERROR, "Missing return value"));
-					} else
-						exchange.setException(ex);
-					
-					callback.done(true);
-
-				});
-
-		}
-		catch (AgentError e) {
-			exchange.setException(e);
-			callback.done(true);
-		}
-		catch (Exception e) {
-			exchange.setException(AgentError.create(AgentError.AgentErrorCode.CUSTOM_ERROR, e, e.getLocalizedMessage()));
-			callback.done(true);
-		}
-
-		return true;
-
 	}
-	
 	
 	
 	ObjectSerializer  getSerializer()
@@ -378,7 +249,7 @@ public class ICService {
 		
 	}
 	
-	
+    
 	ObjectDeserializer getDeserializer()
 	{
 		ObjectDeserializer deserializer = new PojoDeserializer();

@@ -38,7 +38,7 @@ public class ICEndpoint extends DefaultEndpoint {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(ICEndpoint.class);
 	
-	@UriPath(label = "common", defaultValue = "update", enums = "query,update")
+	@UriPath(label = "common", defaultValue = "update", enums = "update,query,oneway")
 	@Metadata(description = "The type of IC operation to use",required = true)
     private String methodType;
 	
@@ -53,7 +53,7 @@ public class ICEndpoint extends DefaultEndpoint {
 	@UriParam(label = "common", enums = "anonymous,basic,secp256k1")
 	@Metadata(description = "The type of identity to use",required = false)
     private String identityType = "anonymous"; 
-	@UriParam(label = "common", enums = "apache,java,okhttp")
+	@UriParam(label = "common", enums = "java,apache,okhttp")
 	@Metadata(description = "The type of transport to use",required = false)
     private String transportType = "java";    
 
@@ -74,7 +74,15 @@ public class ICEndpoint extends DefaultEndpoint {
     
     @UriParam(label = "common")
     @Metadata( description = "Output Java class")
-    private String outClass;    
+    private String outClass;   
+    
+    @UriParam(label = "common")
+    @Metadata(description = "Candid IDL file location")
+    private String idlFile;  
+    
+    @UriParam(label = "common")
+    @Metadata(description = "Load IDL File") 	
+	private Boolean loadIDL = false;    
     
     @UriParam(label = "common")
     @Metadata(description = "Identity PEM file location")
@@ -92,7 +100,12 @@ public class ICEndpoint extends DefaultEndpoint {
 	//delay between two retries
     @UriParam(label = "common")
     @Metadata(description = "Delay between two retries") 	
-	private Integer waiterSleep;    
+	private Integer waiterSleep;  
+    
+	//Only use this when you are _not_ talking to the main Internet Computer
+    @UriParam(label = "common")
+    @Metadata(description = "Only use this when you are not talking to the main Internet Computer") 	
+	private Boolean fetchRootKey = false;    
     
     
     //Set a Replica transport to talk to serve as the replica interface.
@@ -254,6 +267,34 @@ public class ICEndpoint extends DefaultEndpoint {
 	}
 
 	/**
+	 * @return the idlFile
+	 */
+	public String getIdlFile() {
+		return idlFile;
+	}
+
+	/**
+	 * @param idlFile the idlFile to set
+	 */
+	public void setIdlFile(String idlFile) {
+		this.idlFile = idlFile;
+	}
+
+	/**
+	 * @return the loadIDL
+	 */
+	public Boolean getLoadIDL() {
+		return loadIDL;
+	}
+
+	/**
+	 * @param loadIDL the loadIDL to set
+	 */
+	public void setLoadIDL(Boolean loadIDL) {
+		this.loadIDL = loadIDL;
+	}
+
+	/**
 	 * @return the pemFile
 	 */
 	public String getPemFile() {
@@ -359,6 +400,20 @@ public class ICEndpoint extends DefaultEndpoint {
 
 	public void setWaiterSleep(Integer waiterSleep) {
 		this.waiterSleep = waiterSleep;
+	}
+
+	/**
+	 * @return the fetchRootKey
+	 */
+	public Boolean getFetchRootKey() {
+		return fetchRootKey;
+	}
+
+	/**
+	 * @param fetchRootKey the fetchRootKey to set
+	 */
+	public void setFetchRootKey(Boolean fetchRootKey) {
+		this.fetchRootKey = fetchRootKey;
 	}
 	
 	
