@@ -8,8 +8,8 @@
   
 <properties>
 		<jdk.version>11</jdk.version>
-		<ic4j.agent.version>0.6.18-BETA4</ic4j.agent.version>
-		<ic4j.candid.version>0.6.18-BETA4</ic4j.candid.version>
+		<ic4j.agent.version>0.6.18</ic4j.agent.version>
+		<ic4j.candid.version>0.6.18</ic4j.candid.version>
 		<slf4j.version>2.0.3</slf4j.version>
 		<camel.version>3.19.0</camel.version>
 		<maven.compiler.source>11</maven.compiler.source>
