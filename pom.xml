@@ -2,16 +2,16 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.ic4j</groupId>
   <artifactId>ic4j-camel</artifactId>
-  <version>0.6.18</version>
+  <version>0.6.19</version>
   <name>IC4JCamel</name>
   <description>Apache Camel Internet Computer Component</description>
   
 <properties>
 		<jdk.version>11</jdk.version>
-		<ic4j.agent.version>0.6.18</ic4j.agent.version>
-		<ic4j.candid.version>0.6.18</ic4j.candid.version>
+		<ic4j.agent.version>0.6.19</ic4j.agent.version>
+		<ic4j.candid.version>0.6.19</ic4j.candid.version>
 		<slf4j.version>2.0.3</slf4j.version>
-		<camel.version>3.19.0</camel.version>
+		<camel.version>3.20.2</camel.version>
 		<maven.compiler.source>11</maven.compiler.source>
 		<maven.compiler.target>${maven.compiler.source}</maven.compiler.target>
         <!-- plugin versions -->
@@ -57,13 +57,13 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>2.13.1</version>
+			<version>2.14.2</version>
 		</dependency>		
 		<!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
 		<dependency>
 		    <groupId>com.google.code.gson</groupId>
 		    <artifactId>gson</artifactId>
-		    <version>2.10</version>
+		    <version>2.10.1</version>
 		</dependency>	
 		<!-- https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk15on -->
 		<dependency>

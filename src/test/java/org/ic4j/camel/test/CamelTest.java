@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+import com.prowidesoftware.swift.model.mx.MxPain00100103;
 
 public final class CamelTest extends CamelTestSupport {
 	static Logger LOG;
@@ -29,6 +30,8 @@ public final class CamelTest extends CamelTestSupport {
 	static String PROPERTIES_FILE_NAME = "application.properties";
 	static final String SIMPLE_XML_NODE_FILE = "SimpleNode.xml";
 	static final String SIMPLE_JSON_NODE_FILE = "SimpleNode.json";
+	
+	static final String SWIFT_XML_NODE_FILE = "CustomerCreditTransferInitiationV03.xml";
 	
 	protected static String ED25519_IDENTITY_FILE = "Ed25519_identity.pem";	
 	protected static String SECP256K1_IDENTITY_FILE = "Secp256k1_identity.pem";	
@@ -54,11 +57,16 @@ public final class CamelTest extends CamelTestSupport {
 	public void test() {
 
 		try {
+			JAXBContext context = JAXBContext.newInstance(MxPain00100103.class);
+	        
+	        MxPain00100103 swiftJAXBValue =  (MxPain00100103) context.createUnmarshaller()		
+				      .unmarshal(new File(getClass().getClassLoader().getResource(SWIFT_XML_NODE_FILE).getFile()));
+	        
 			Security.addProvider(new BouncyCastleProvider());
 			
 	        getMockEndpoint("mock:update").expectedBodiesReceived("Hello, World!");
 
-	        template.sendBody("direct:update", "World");        
+	        template.sendBody("direct:update", "World");   	        
 
 	        assertMockEndpointsSatisfied();	
 	        
@@ -111,7 +119,7 @@ public final class CamelTest extends CamelTestSupport {
 
 	        assertMockEndpointsSatisfied();		        
 	        
-		    JAXBContext context = JAXBContext.newInstance(JAXBPojo.class);
+		    context = JAXBContext.newInstance(JAXBPojo.class);
 		    JAXBPojo pojoJAXBValue =  (JAXBPojo) context.createUnmarshaller()		
 		      .unmarshal(new File(getClass().getClassLoader().getResource(SIMPLE_XML_NODE_FILE).getFile()));
 		    
@@ -119,7 +127,7 @@ public final class CamelTest extends CamelTestSupport {
 
 	        template.sendBody("direct:jaxb", pojoJAXBValue);        
 
-	        assertMockEndpointsSatisfied();		
+	        assertMockEndpointsSatisfied();			     
 	        
 		    // create object mapper instance
 		    ObjectMapper mapper = new ObjectMapper();
