@@ -8,10 +8,10 @@
   
 <properties>
 		<jdk.version>11</jdk.version>
-		<ic4j.agent.version>0.6.19</ic4j.agent.version>
+		<ic4j.agent.version>0.6.19.1</ic4j.agent.version>
 		<ic4j.candid.version>0.6.19</ic4j.candid.version>
-		<slf4j.version>2.0.3</slf4j.version>
-		<camel.version>3.20.2</camel.version>
+		<slf4j.version>2.0.6</slf4j.version>
+		<camel.version>3.20.3</camel.version>
 		<maven.compiler.source>11</maven.compiler.source>
 		<maven.compiler.target>${maven.compiler.source}</maven.compiler.target>
         <!-- plugin versions -->
