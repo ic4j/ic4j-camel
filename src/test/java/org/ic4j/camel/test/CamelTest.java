@@ -13,6 +13,7 @@ import javax.xml.bind.JAXBContext;
 
 import org.apache.camel.RoutesBuilder;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.junit5.CamelTestSupport;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.jupiter.api.Assertions;
@@ -68,37 +69,39 @@ public final class CamelTest extends CamelTestSupport {
 
 	        template.sendBody("direct:update", "World");   	        
 
-	        assertMockEndpointsSatisfied();	
+	        
+	        MockEndpoint.assertIsSatisfied(this.context());
+	        
 	        
 	        getMockEndpoint("mock:loadidl").expectedBodiesReceived("Hello, World!");
 
 	        template.sendBody("direct:loadidl", "World");        
 
-	        assertMockEndpointsSatisfied();	        
+	        MockEndpoint.assertIsSatisfied(this.context());	        
 	
 	        getMockEndpoint("mock:query").expectedBodiesReceived("World");
 
 	        template.sendBody("direct:query", null);        
 
-	        assertMockEndpointsSatisfied();	
+	        MockEndpoint.assertIsSatisfied(this.context());	
 	        
 	        getMockEndpoint("mock:okhttp").expectedBodiesReceived("World");
 
 	        template.sendBody("direct:okhttp", null);        
 
-	        assertMockEndpointsSatisfied();	
+	        MockEndpoint.assertIsSatisfied(this.context());	
 	        
-	        getMockEndpoint("mock:apache").expectedBodiesReceived("World");
+//	        getMockEndpoint("mock:apache").expectedBodiesReceived("World");
 
-	        template.sendBody("direct:apache", null);        
+//	        template.sendBody("direct:apache", null);        
 
-	        assertMockEndpointsSatisfied();	
+//	        MockEndpoint.assertIsSatisfied(this.context());	
 	        
 	        getMockEndpoint("mock:basic").expectedBodiesReceived("World");
 
 	        template.sendBody("direct:basic", null);        
 
-	        assertMockEndpointsSatisfied();		        
+	        MockEndpoint.assertIsSatisfied(this.context());		        
 	        
 			// Record POJO
 
@@ -111,13 +114,13 @@ public final class CamelTest extends CamelTestSupport {
 
 	        template.sendBody("direct:pojo", pojoValue);        
 
-	        assertMockEndpointsSatisfied();	
+	        MockEndpoint.assertIsSatisfied(this.context());	
 	        
 	        getMockEndpoint("mock:updatepojo").expectedBodiesReceived(pojoValue);
 
 	        template.sendBody("direct:updatepojo", pojoValue);        
 
-	        assertMockEndpointsSatisfied();		        
+	        MockEndpoint.assertIsSatisfied(this.context());		        
 	        
 		    context = JAXBContext.newInstance(JAXBPojo.class);
 		    JAXBPojo pojoJAXBValue =  (JAXBPojo) context.createUnmarshaller()		
@@ -127,7 +130,7 @@ public final class CamelTest extends CamelTestSupport {
 
 	        template.sendBody("direct:jaxb", pojoJAXBValue);        
 
-	        assertMockEndpointsSatisfied();			     
+	        MockEndpoint.assertIsSatisfied(this.context());			     
 	        
 		    // create object mapper instance
 		    ObjectMapper mapper = new ObjectMapper();
@@ -139,7 +142,7 @@ public final class CamelTest extends CamelTestSupport {
 
 	        template.sendBody("direct:jackson", pojoJacksonValue);        
 
-	        assertMockEndpointsSatisfied();	
+	        MockEndpoint.assertIsSatisfied(this.context());	
 	        
 	        // create Gson instance
 	        Gson gson = new Gson();
@@ -153,7 +156,7 @@ public final class CamelTest extends CamelTestSupport {
 
 	        template.sendBody("direct:gson", pojoGsonValue);        
 
-	        assertMockEndpointsSatisfied();		        
+	        MockEndpoint.assertIsSatisfied(this.context());	        
 
 		} catch (Exception e) {
 			LOG.error(e.getLocalizedMessage(), e);
@@ -180,7 +183,7 @@ public final class CamelTest extends CamelTestSupport {
  
             	from("direct:okhttp").to("ic:query?url=" + icLocation + "&method=getName&transportType=okhttp&canisterId=" + icCanister).to("mock:okhttp");
 
-            	from("direct:apache").to("ic:query?url=" + icLocation + "&method=getName&transportType=apache&canisterId=" + icCanister).to("mock:apache");            	
+//            	from("direct:apache").to("ic:query?url=" + icLocation + "&method=getName&transportType=apache&canisterId=" + icCanister).to("mock:apache");            	
 
             	from("direct:basic").to("ic:query?url=" + icLocation + "&method=getName&identityType=basic&pemFile=" + ED25519_IDENTITY_FILE + "&canisterId=" + icCanister).to("mock:basic");            	
 

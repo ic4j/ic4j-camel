@@ -97,9 +97,9 @@ public class ICService {
 		case "okhttp":
 			transport = ReplicaOkHttpTransport.create(url);
 			break;
-		case "apache":
-			transport = ReplicaApacheHttpTransport.create(url);		
-			break;
+//		case "apache":
+//			transport = ReplicaApacheHttpTransport.create(url);		
+//			break;
 		default:
 			transport = ReplicaJavaHttpTransport.create(url);
 			break;

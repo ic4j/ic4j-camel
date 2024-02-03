@@ -53,7 +53,7 @@ public class ICEndpoint extends DefaultEndpoint {
 	@UriParam(label = "common", enums = "anonymous,basic,secp256k1")
 	@Metadata(description = "The type of identity to use",required = false)
     private String identityType = "anonymous"; 
-	@UriParam(label = "common", enums = "java,apache,okhttp")
+	@UriParam(label = "common", enums = "java,okhttp")
 	@Metadata(description = "The type of transport to use",required = false)
     private String transportType = "java";    
 
