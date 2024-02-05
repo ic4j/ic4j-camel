@@ -2,17 +2,17 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.ic4j</groupId>
   <artifactId>ic4j-camel</artifactId>
-  <version>0.6.19</version>
+  <version>0.6.19.6</version>
   <name>IC4JCamel</name>
   <description>Apache Camel Internet Computer Component</description>
   
 <properties>
-		<jdk.version>11</jdk.version>
-		<ic4j.agent.version>0.6.19.1</ic4j.agent.version>
-		<ic4j.candid.version>0.6.19</ic4j.candid.version>
+		<jdk.version>17</jdk.version>
+		<ic4j.agent.version>0.6.19.6</ic4j.agent.version>
+		<ic4j.candid.version>0.6.19.7</ic4j.candid.version>
 		<slf4j.version>2.0.6</slf4j.version>
-		<camel.version>3.20.3</camel.version>
-		<maven.compiler.source>11</maven.compiler.source>
+		<camel.version>4.3.0</camel.version>
+		<maven.compiler.source>17</maven.compiler.source>
 		<maven.compiler.target>${maven.compiler.source}</maven.compiler.target>
         <!-- plugin versions -->
         <version.plugin.compiler>3.10.1</version.plugin.compiler>
@@ -41,7 +41,7 @@
 		<dependency>
 		  <groupId>org.ic4j</groupId>
 		  <artifactId>ic4j-candid-gson</artifactId>
-		 <version>${ic4j.candid.version}</version>
+		 <version>0.6.19.6</version>
 		</dependency>		
 		<dependency>
 			<groupId>org.slf4j</groupId>

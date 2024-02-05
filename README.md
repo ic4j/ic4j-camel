@@ -44,4 +44,4 @@ To enable the loading of IC4J libraries, you should move the [src/application.pr
 
 # Build
 
-You need JDK 11+ to build IC4J Apache Camel Internet Computer Component.
+You need JDK 17+ to build IC4J Apache Camel Internet Computer Component.
