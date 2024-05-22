@@ -13,20 +13,20 @@ The IC4J Camel component allows native execution of Internet Computer smart cont
 
 To add Java IC4J Apache Camel Internet Computer Component library to your Java project use Maven or Gradle import from Maven Central.
 
-<a href="https://search.maven.org/artifact/ic4j/ic4j-camel/0.6.19.7/jar">
-https://search.maven.org/artifact/ic4j/ic4j-camel/0.6.19.7/jar
+<a href="https://search.maven.org/artifact/ic4j/ic4j-camel/0.7.0/jar">
+https://search.maven.org/artifact/ic4j/ic4j-camel/0.7.0/jar
 </a>
 
 ```
 <dependency>
   <groupId>org.ic4j</groupId>
   <artifactId>ic4j-camel</artifactId>
-  <version>0.6.19.7</version>
+  <version>0.7.0</version>
 </dependency>
 ```
 
 ```
-implementation 'org.ic4j:ic4j-camel:0.6.19.7'
+implementation 'org.ic4j:ic4j-camel:0.7.0'
 ```
 
 To install IC4J Camel component to Apache Karavan Visual Studio Code plug-in add 
@@ -35,9 +35,9 @@ To install IC4J Camel component to Apache Karavan Visual Studio Code plug-in add
 ic
 ```
 
-to .vscode/extensions/camel-karavan.karavan-4.40.0/components/components.properties file
+to .vscode/extensions/camel-karavan.karavan-4.50.0/components/components.properties file
 
-and content of [src/ic.json](./src/ic.json) file to .vscode/extensions/camel-karavan.karavan-4.40.0/components/components.json file.
+and content of [src/ic.json](./src/ic.json) file to .vscode/extensions/camel-karavan.karavan-4.50.0/components/components.json file.
 
 To enable the loading of IC4J libraries, you should move the [src/application.properties](./src/application.properties) file to the root of your project. 
 

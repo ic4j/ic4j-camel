@@ -242,7 +242,9 @@ public class ICService {
 				case "dom":
 					return new DOMSerializer();	
 				case "jaxb":
-					return new JAXBSerializer();						
+					return new JAXBSerializer();	
+				case "jakarta":
+					return new org.ic4j.candid.jakarta.JAXBSerializer();				
 			}
 		
 		return serializer;	
@@ -264,7 +266,9 @@ public class ICService {
 				case "dom":
 					return new DOMDeserializer();	
 				case "jaxb":
-					return new JAXBDeserializer();						
+					return new JAXBDeserializer();	
+				case "jakarta":
+					return new org.ic4j.candid.jakarta.JAXBDeserializer();						
 			}
 		
 		return deserializer;

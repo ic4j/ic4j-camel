@@ -65,10 +65,10 @@ public class ICEndpoint extends DefaultEndpoint {
     @Metadata(description = "The effective canister ID of the destination")
     private String effectiveCanisterId;  
     
-    @UriParam(label = "common", enums = "pojo,jackson,gson,dom,jaxb")
+    @UriParam(label = "common", enums = "pojo,jackson,gson,dom,jaxb,jakarta")
 	@Metadata(description = "Input type")
     private String inType;
-    @UriParam(label = "common", enums = "pojo,jackson,gson,dom,jaxb")
+    @UriParam(label = "common", enums = "pojo,jackson,gson,dom,jaxb,jakarta")
     @Metadata( description = "Output type")
     private String outType;
     

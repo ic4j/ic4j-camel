@@ -130,7 +130,17 @@ public final class CamelTest extends CamelTestSupport {
 
 	        template.sendBody("direct:jaxb", pojoJAXBValue);        
 
-	        MockEndpoint.assertIsSatisfied(this.context());			     
+	        MockEndpoint.assertIsSatisfied(this.context());		
+	        
+	        jakarta.xml.bind.JAXBContext jakartaContext = jakarta.xml.bind.JAXBContext.newInstance(JakartaJAXBPojo.class);
+		    JakartaJAXBPojo pojoJakartaJAXBValue =  (JakartaJAXBPojo) jakartaContext.createUnmarshaller()		
+		      .unmarshal(new File(getClass().getClassLoader().getResource(SIMPLE_XML_NODE_FILE).getFile()));
+		    
+	        getMockEndpoint("mock:jakarta").expectedBodiesReceived(pojoJakartaJAXBValue);
+
+	        template.sendBody("direct:jakarta", pojoJakartaJAXBValue);        
+
+	        MockEndpoint.assertIsSatisfied(this.context());		        
 	        
 		    // create object mapper instance
 		    ObjectMapper mapper = new ObjectMapper();
@@ -195,7 +205,9 @@ public final class CamelTest extends CamelTestSupport {
             	
             	from("direct:jaxb").to("ic:query?url=" + icLocation + "&method=echoPojo&canisterId=" + icCanister + "&inType=jaxb&outType=jaxb&outClass=org.ic4j.camel.test.JAXBPojo").to("mock:jaxb");
 
-               	from("direct:jackson").to("ic:query?url=" + icLocation + "&method=echoPojo&canisterId=" + icCanister + "&inType=jackson&outClass=org.ic4j.camel.test.JacksonPojo").to("mock:jackson");           	
+               	from("direct:jakarta").to("ic:query?url=" + icLocation + "&method=echoPojo&canisterId=" + icCanister + "&inType=jakarta&outType=jaxb&outClass=org.ic4j.camel.test.JakartaJAXBPojo").to("mock:jakarta");
+
+            	from("direct:jackson").to("ic:query?url=" + icLocation + "&method=echoPojo&canisterId=" + icCanister + "&inType=jackson&outClass=org.ic4j.camel.test.JacksonPojo").to("mock:jackson");           	
 
               	from("direct:gson").to("ic:query?url=" + icLocation + "&method=echoPojo&canisterId=" + icCanister + "&inType=gson&outClass=org.ic4j.camel.test.GsonPojo").to("mock:gson");           	
                	
