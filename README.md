@@ -35,9 +35,9 @@ To install IC4J Camel component to Apache Karavan Visual Studio Code plug-in add
 ic
 ```
 
-to .vscode/extensions/camel-karavan.karavan-4.50.0/components/components.properties file
+to .vscode/extensions/camel-karavan.karavan-4.60.0/components/components.properties file
 
-and content of [src/ic.json](./src/ic.json) file to .vscode/extensions/camel-karavan.karavan-4.50.0/components/components.json file.
+and content of [src/ic.json](./src/ic.json) file to .vscode/extensions/camel-karavan.karavan-4.60.0/components/components.json file.
 
 To enable the loading of IC4J libraries, you should move the [src/application.properties](./src/application.properties) file to the root of your project. 
 
