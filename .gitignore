@@ -1,0 +1,15 @@
+/bin/
+/build/
+/.gradle/
+/scripts/
+/secring.gpg
+/build-export.gradle
+/.classpath
+/gradle.properties
+/.settings/
+/target/
+.DS_Store
+.project
+pom-export.xml
+settings.xml
+build.gradle

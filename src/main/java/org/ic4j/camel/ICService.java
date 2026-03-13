@@ -39,6 +39,7 @@ import org.ic4j.agent.http.ReplicaOkHttpTransport;
 import org.ic4j.agent.identity.AnonymousIdentity;
 import org.ic4j.agent.identity.BasicIdentity;
 import org.ic4j.agent.identity.Identity;
+import org.ic4j.agent.identity.Prime256v1Identity;
 import org.ic4j.agent.identity.Secp256k1Identity;
 import org.ic4j.candid.ObjectDeserializer;
 import org.ic4j.candid.ObjectSerializer;
@@ -48,8 +49,8 @@ import org.ic4j.candid.gson.GsonDeserializer;
 import org.ic4j.candid.gson.GsonSerializer;
 import org.ic4j.candid.jackson.JacksonDeserializer;
 import org.ic4j.candid.jackson.JacksonSerializer;
-import org.ic4j.candid.jaxb.JAXBDeserializer;
-import org.ic4j.candid.jaxb.JAXBSerializer;
+import org.ic4j.candid.jaxb.javax.JAXBDeserializer;
+import org.ic4j.candid.jaxb.javax.JAXBSerializer;
 import org.ic4j.candid.pojo.PojoDeserializer;
 import org.ic4j.candid.pojo.PojoSerializer;
 import org.ic4j.candid.types.Mode;
@@ -97,9 +98,9 @@ public class ICService {
 		case "okhttp":
 			transport = ReplicaOkHttpTransport.create(url);
 			break;
-//		case "apache":
-//			transport = ReplicaApacheHttpTransport.create(url);		
-//			break;
+		case "apache":
+			transport = ReplicaApacheHttpTransport.create(url);		
+			break;
 		default:
 			transport = ReplicaJavaHttpTransport.create(url);
 			break;
@@ -124,7 +125,10 @@ public class ICService {
 			break;
 		case "secp256k1":				
 				identity = Secp256k1Identity.fromPEMFile(Paths.get(pemFileName));	
-			break;			
+			break;	
+		case "prime256v1":				
+			identity = Prime256v1Identity.fromPEMFile(Paths.get(pemFileName));	
+		break;				
 		default:
 			identity = new AnonymousIdentity();
 			break;
@@ -241,10 +245,10 @@ public class ICService {
 					return new GsonSerializer();					
 				case "dom":
 					return new DOMSerializer();	
-				case "jaxb":
+				case "jaxb.javax":
 					return new JAXBSerializer();	
-				case "jakarta":
-					return new org.ic4j.candid.jakarta.JAXBSerializer();				
+				case "jaxb.jakarta":
+					return new org.ic4j.candid.jaxb.jakarta.JAXBSerializer();				
 			}
 		
 		return serializer;	
@@ -265,10 +269,10 @@ public class ICService {
 					return new GsonDeserializer();					
 				case "dom":
 					return new DOMDeserializer();	
-				case "jaxb":
+				case "jaxb.javax":
 					return new JAXBDeserializer();	
-				case "jakarta":
-					return new org.ic4j.candid.jakarta.JAXBDeserializer();						
+				case "jaxb.jakarta":
+					return new org.ic4j.candid.jaxb.jakarta.JAXBDeserializer();						
 			}
 		
 		return deserializer;

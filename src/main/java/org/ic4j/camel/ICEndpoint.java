@@ -50,10 +50,10 @@ public class ICEndpoint extends DefaultEndpoint {
     @Metadata(description = "The name of the canister method being called", required = true)
     private String method; 		
 	
-	@UriParam(label = "common", enums = "anonymous,basic,secp256k1")
+	@UriParam(label = "common", enums = "anonymous,basic,secp256k1,prime256v1")
 	@Metadata(description = "The type of identity to use",required = false)
     private String identityType = "anonymous"; 
-	@UriParam(label = "common", enums = "java,okhttp")
+	@UriParam(label = "common", enums = "java,apache,okhttp")
 	@Metadata(description = "The type of transport to use",required = false)
     private String transportType = "java";    
 
@@ -65,10 +65,10 @@ public class ICEndpoint extends DefaultEndpoint {
     @Metadata(description = "The effective canister ID of the destination")
     private String effectiveCanisterId;  
     
-    @UriParam(label = "common", enums = "pojo,jackson,gson,dom,jaxb,jakarta")
+    @UriParam(label = "common", enums = "pojo,jackson,gson,dom,jaxb.javax,jaxb.jakarta")
 	@Metadata(description = "Input type")
     private String inType;
-    @UriParam(label = "common", enums = "pojo,jackson,gson,dom,jaxb,jakarta")
+    @UriParam(label = "common", enums = "pojo,jackson,gson,dom,jaxb.javax,jaxb.jakarta")
     @Metadata( description = "Output type")
     private String outType;
     

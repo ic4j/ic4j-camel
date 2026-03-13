@@ -11,7 +11,7 @@ plugins {
 }
 
 group 'org.ic4j'
-version '0.7.0'
+version '0.7.1'
 
 sourceCompatibility = 17
 
@@ -46,15 +46,15 @@ test {
 }
 
 dependencies {
-	implementation group: 'org.ic4j', name: 'ic4j-candid', version: '0.7.0'
-	implementation group: 'org.ic4j', name: 'ic4j-agent', version: '0.7.0'	
-	implementation group: 'org.ic4j', name: 'ic4j-java11transport', version: '0.7.0'
+	implementation group: 'org.ic4j', name: 'ic4j-candid', version: '0.7.1'
+	implementation group: 'org.ic4j', name: 'ic4j-agent', version: '0.7.1'	
+	implementation group: 'org.ic4j', name: 'ic4j-java11transport', version: '0.7.1'
 	
 	// https://mvnrepository.com/artifact/com.google.code.gson/gson
 	implementation group: 'com.google.code.gson', name: 'gson', version: '2.10.1'	
 	
 	// https://mvnrepository.com/artifact/org.apache.camel/camel-core
-	implementation group: 'org.apache.camel', name: 'camel-core', version: '4.6.0'
+	implementation group: 'org.apache.camel', name: 'camel-core', version: '4.7.0'
 	
 	implementation group: 'org.slf4j', name: 'slf4j-simple', version: '2.0.13'	
 	
@@ -77,7 +77,7 @@ dependencies {
 	implementation group: 'org.bouncycastle', name: 'bcpkix-jdk18on', version: '1.78.1'
 	
 	// https://mvnrepository.com/artifact/org.apache.camel/camel-test-junit5
-	implementation group: 'org.apache.camel', name: 'camel-test-junit5', version: '4.6.0'
+	testImplementation group: 'org.apache.camel', name: 'camel-test-junit5', version: '4.7.0'
 	
 	testImplementation  group: 'org.glassfish.jaxb', name: 'jaxb-runtime', version: '2.3.1'		
 	
@@ -85,7 +85,7 @@ dependencies {
 	testImplementation group: 'com.sun.xml.bind', name: 'jaxb-impl', version: '3.0.2'	
 	
 	// https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-engine
-	testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.9.2'	
+	testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.10.3'	
 	
 	testImplementation group: 'com.prowidesoftware', name: 'pw-iso20022', version: 'SRU2023-9.4.4'		
 }

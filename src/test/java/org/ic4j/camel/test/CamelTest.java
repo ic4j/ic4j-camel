@@ -9,8 +9,6 @@ import java.math.BigInteger;
 import java.security.Security;
 import java.util.Properties;
 
-import javax.xml.bind.JAXBContext;
-
 import org.apache.camel.RoutesBuilder;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
@@ -58,9 +56,9 @@ public final class CamelTest extends CamelTestSupport {
 	public void test() {
 
 		try {
-			JAXBContext context = JAXBContext.newInstance(MxPain00100103.class);
+			javax.xml.bind.JAXBContext legacyContext = javax.xml.bind.JAXBContext.newInstance(MxPain00100103.class);
 	        
-	        MxPain00100103 swiftJAXBValue =  (MxPain00100103) context.createUnmarshaller()		
+	        MxPain00100103 swiftJAXBValue =  (MxPain00100103) legacyContext.createUnmarshaller()		
 				      .unmarshal(new File(getClass().getClassLoader().getResource(SWIFT_XML_NODE_FILE).getFile()));
 	        
 			Security.addProvider(new BouncyCastleProvider());
@@ -122,8 +120,8 @@ public final class CamelTest extends CamelTestSupport {
 
 	        MockEndpoint.assertIsSatisfied(this.context());		        
 	        
-		    context = JAXBContext.newInstance(JAXBPojo.class);
-		    JAXBPojo pojoJAXBValue =  (JAXBPojo) context.createUnmarshaller()		
+		    jakarta.xml.bind.JAXBContext jakartaContext = jakarta.xml.bind.JAXBContext.newInstance(JAXBPojo.class);
+		    JAXBPojo pojoJAXBValue =  (JAXBPojo) jakartaContext.createUnmarshaller()		
 		      .unmarshal(new File(getClass().getClassLoader().getResource(SIMPLE_XML_NODE_FILE).getFile()));
 		    
 	        getMockEndpoint("mock:jaxb").expectedBodiesReceived(pojoJAXBValue);
@@ -132,8 +130,8 @@ public final class CamelTest extends CamelTestSupport {
 
 	        MockEndpoint.assertIsSatisfied(this.context());		
 	        
-	        jakarta.xml.bind.JAXBContext jakartaContext = jakarta.xml.bind.JAXBContext.newInstance(JakartaJAXBPojo.class);
-		    JakartaJAXBPojo pojoJakartaJAXBValue =  (JakartaJAXBPojo) jakartaContext.createUnmarshaller()		
+	        jakarta.xml.bind.JAXBContext jakartaPojoContext = jakarta.xml.bind.JAXBContext.newInstance(JakartaJAXBPojo.class);
+		    JakartaJAXBPojo pojoJakartaJAXBValue =  (JakartaJAXBPojo) jakartaPojoContext.createUnmarshaller()		
 		      .unmarshal(new File(getClass().getClassLoader().getResource(SIMPLE_XML_NODE_FILE).getFile()));
 		    
 	        getMockEndpoint("mock:jakarta").expectedBodiesReceived(pojoJakartaJAXBValue);
@@ -193,7 +191,7 @@ public final class CamelTest extends CamelTestSupport {
  
             	from("direct:okhttp").to("ic:query?url=" + icLocation + "&method=getName&transportType=okhttp&canisterId=" + icCanister).to("mock:okhttp");
 
-//            	from("direct:apache").to("ic:query?url=" + icLocation + "&method=getName&transportType=apache&canisterId=" + icCanister).to("mock:apache");            	
+            	from("direct:apache").to("ic:query?url=" + icLocation + "&method=getName&transportType=apache&canisterId=" + icCanister).to("mock:apache");            	
 
             	from("direct:basic").to("ic:query?url=" + icLocation + "&method=getName&identityType=basic&pemFile=" + ED25519_IDENTITY_FILE + "&canisterId=" + icCanister).to("mock:basic");            	
 
