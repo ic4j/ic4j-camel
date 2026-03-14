@@ -23,7 +23,7 @@ if ! dfx ping local >/dev/null 2>&1; then
   dfx start --background --clean
 fi
 
-dfx deploy
+dfx deploy --yes
 
 CANISTER_ID="$(python3 - <<'PY'
 import json

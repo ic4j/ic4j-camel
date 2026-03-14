@@ -24,6 +24,8 @@ cd /Users/roman/Projects/eclipse-workspace/ic4j-camel
 mvn -DskipTests install
 ```
 
+This sample resolves `org.ic4j:ic4j-camel:0.8.0` from your local Maven repository. If you change code or resources in the root project and want the sample to pick them up, rerun `mvn -DskipTests install` from the repository root before restarting the sample.
+
 ## Run Everything
 
 ```bash
@@ -43,7 +45,7 @@ The script will:
 ```bash
 cd /Users/roman/Projects/eclipse-workspace/ic4j-camel/samples/mcp-icp-motoko
 dfx start --background --clean
-dfx deploy
+dfx deploy --yes
 
 CANISTER_ID=$(python3 - <<'PY'
 import json
@@ -67,6 +69,7 @@ mvn exec:java \
 ## Notes
 
 - The sample is intentionally YAML-only so it reuses the existing MCP and ICP Camel components directly.
+- The sample runs from its compiled resources plus the installed Maven-local `ic4j-camel` jar, not directly from the root module's `target/classes`.
 - On a local `dfx` replica, update calls can still emit certificate verification noise from the underlying agent. The sample route tolerates that for the `greet` demo and reads back state with `getName`.
 
 ## Quick Tests

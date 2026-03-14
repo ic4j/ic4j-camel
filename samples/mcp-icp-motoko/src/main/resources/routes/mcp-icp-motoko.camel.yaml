@@ -91,7 +91,7 @@
                         - simple: "${exchangeProperty.mcp.tool.name} == 'echo-pojo'"
                           steps:
                             - to:
-                                uri: "ic:query?url={{sample.ic.location}}&method=echoPojo&canisterId={{sample.ic.canister}}&inType=jackson&outType=jackson&fetchRootKey=true"
+                                uri: "ic:query?url={{sample.ic.location}}&method=echoPojo&canisterId={{sample.ic.canister}}&inType=jackson&outType=jackson&loadIDL=true&fetchRootKey=true"
                             - to:
                                 uri: direct:mcp-result-json
                       otherwise:

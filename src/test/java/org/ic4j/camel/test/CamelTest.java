@@ -6,20 +6,36 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigInteger;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.Security;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Properties;
 
+import org.apache.camel.CamelExecutionException;
 import org.apache.camel.RoutesBuilder;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.junit5.CamelTestSupport;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.ic4j.agent.AgentBuilder;
+import org.ic4j.agent.ProxyBuilder;
+import org.ic4j.agent.ReplicaTransport;
+import org.ic4j.agent.http.ReplicaJavaHttpTransport;
+import org.ic4j.agent.identity.AnonymousIdentity;
+import org.ic4j.candid.jackson.JacksonDeserializer;
+import org.ic4j.candid.jackson.JacksonSerializer;
+import org.ic4j.types.Func;
+import org.ic4j.types.Principal;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.gson.Gson;
 import com.prowidesoftware.swift.model.mx.MxPain00100103;
 
@@ -31,6 +47,8 @@ public final class CamelTest extends CamelTestSupport {
 	static final String SIMPLE_JSON_NODE_FILE = "SimpleNode.json";
 	
 	static final String SWIFT_XML_NODE_FILE = "CustomerCreditTransferInitiationV03.xml";
+	static final Path LOCAL_SAMPLE_CANISTER_IDS = Path.of("samples", "mcp-icp-motoko", ".dfx", "local", "canister_ids.json");
+	static final String LOCAL_SAMPLE_LOCATION = "http://127.0.0.1:4943/";
 	
 	protected static String ED25519_IDENTITY_FILE = "Ed25519_identity.pem";	
 	protected static String SECP256K1_IDENTITY_FILE = "Secp256k1_identity.pem";	
@@ -145,6 +163,7 @@ public final class CamelTest extends CamelTestSupport {
 
 		    // convert a JSON string to a JacksonPojo object
 		    JacksonPojo pojoJacksonValue = mapper.readValue(new File(getClass().getClassLoader().getResource(SIMPLE_JSON_NODE_FILE).getFile()), JacksonPojo.class);
+		    JsonNode pojoJacksonNode = mapper.readTree(new File(getClass().getClassLoader().getResource(SIMPLE_JSON_NODE_FILE).getFile()));
 		    
 	        getMockEndpoint("mock:jackson").expectedBodiesReceived(pojoJacksonValue);
 
@@ -170,6 +189,73 @@ public final class CamelTest extends CamelTestSupport {
 			LOG.error(e.getLocalizedMessage(), e);
 			Assertions.fail(e.getMessage());
 		}
+	}
+
+	@Test
+	public void testAgentJacksonLoadIdlMap() throws Exception {
+		String localCanisterId = getLocalSampleCanisterId();
+
+		ReplicaTransport transport = ReplicaJavaHttpTransport.create(LOCAL_SAMPLE_LOCATION);
+		var agent = new AgentBuilder().transport(transport).identity(new AnonymousIdentity()).build();
+		agent.fetchRootKey();
+		Principal canister = Principal.fromString(localCanisterId);
+
+		Map<String, Object> pojoJacksonMap = new LinkedHashMap<>();
+		pojoJacksonMap.put("bar", Boolean.TRUE);
+		pojoJacksonMap.put("foo", 42);
+
+		var proxy = ProxyBuilder.create(agent).disableRangeCheck(true).loadIDL(true).getFuncProxy(new Func(canister, "echoPojo"));
+		proxy.setSerializers(new JacksonSerializer());
+		proxy.setDeserializer(new JacksonDeserializer());
+		proxy.setResponseClass(JsonNode.class);
+
+		JsonNode response = (JsonNode) proxy.call(pojoJacksonMap);
+
+		Assertions.assertEquals(true, response.get("bar").booleanValue());
+		Assertions.assertEquals(42, response.get("foo").intValue());
+	}
+
+	@Test
+	public void testCamelJacksonLoadIdlMapLocal() throws Exception {
+		String localCanisterId = getLocalSampleCanisterId();
+
+		Map<String, Object> pojoJacksonMap = new LinkedHashMap<>();
+		pojoJacksonMap.put("bar", Boolean.TRUE);
+		pojoJacksonMap.put("foo", 42);
+
+		String endpoint = "ic:query?url=" + LOCAL_SAMPLE_LOCATION
+				+ "&method=echoPojo&canisterId=" + localCanisterId
+				+ "&inType=jackson&outType=jackson&loadIDL=true&fetchRootKey=true";
+
+		JsonNode response = template.requestBody(endpoint, pojoJacksonMap, JsonNode.class);
+
+		Assertions.assertEquals(true, response.get("bar").booleanValue());
+		Assertions.assertEquals(42, response.get("foo").intValue());
+	}
+
+	@Test
+	public void testCamelJacksonLoadIdlMapFails() {
+		Map<String, Object> pojoJacksonMap = new LinkedHashMap<>();
+		pojoJacksonMap.put("bar", Boolean.TRUE);
+		pojoJacksonMap.put("foo", 42);
+
+		CamelExecutionException exception = Assertions.assertThrows(
+			CamelExecutionException.class,
+			() -> template.requestBody("direct:jacksonloadidl", pojoJacksonMap, JsonNode.class));
+
+		Throwable cause = exception.getCause();
+		Assertions.assertNotNull(cause);
+		Assertions.assertTrue(cause.getMessage().contains("unexpected IDL type when parsing Int"));
+	}
+
+	private String getLocalSampleCanisterId() throws Exception {
+		Assumptions.assumeTrue(Files.exists(LOCAL_SAMPLE_CANISTER_IDS), "Local dfx sample is not deployed");
+
+		ObjectMapper mapper = new ObjectMapper();
+		JsonNode canisterIds = mapper.readTree(LOCAL_SAMPLE_CANISTER_IDS.toFile());
+		JsonNode localCanister = canisterIds.path("motoko_sample").path("local");
+		Assumptions.assumeTrue(!localCanister.isMissingNode() && !localCanister.asText().isBlank(), "Local motoko_sample canister id is unavailable");
+		return localCanister.asText();
 	}
 	
     @Override
@@ -206,6 +292,8 @@ public final class CamelTest extends CamelTestSupport {
                	from("direct:jakarta").to("ic:query?url=" + icLocation + "&method=echoPojo&canisterId=" + icCanister + "&inType=jakarta&outType=jaxb&outClass=org.ic4j.camel.test.JakartaJAXBPojo").to("mock:jakarta");
 
             	from("direct:jackson").to("ic:query?url=" + icLocation + "&method=echoPojo&canisterId=" + icCanister + "&inType=jackson&outClass=org.ic4j.camel.test.JacksonPojo").to("mock:jackson");           	
+
+	            	from("direct:jacksonloadidl").to("ic:query?url=" + icLocation + "&method=echoPojo&canisterId=" + icCanister + "&inType=jackson&outType=jackson&loadIDL=true").to("mock:jacksonloadidl");
 
               	from("direct:gson").to("ic:query?url=" + icLocation + "&method=echoPojo&canisterId=" + icCanister + "&inType=gson&outClass=org.ic4j.camel.test.GsonPojo").to("mock:gson");           	
                	

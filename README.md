@@ -29,20 +29,20 @@ This starts a local `dfx` replica, deploys the sample Motoko canister, and serve
 
 To add Java IC4J Apache Camel Internet Computer Component library to your Java project use Maven or Gradle import from Maven Central.
 
-<a href="https://search.maven.org/artifact/ic4j/ic4j-camel/0.7.0/jar">
-https://search.maven.org/artifact/ic4j/ic4j-camel/0.7.0/jar
+<a href="https://search.maven.org/artifact/ic4j/ic4j-camel/0.8.0/jar">
+https://search.maven.org/artifact/ic4j/ic4j-camel/0.8.0/jar
 </a>
 
 ```
 <dependency>
   <groupId>org.ic4j</groupId>
   <artifactId>ic4j-camel</artifactId>
-  <version>0.7.0</version>
+  <version>0.8.0</version>
 </dependency>
 ```
 
 ```
-implementation 'org.ic4j:ic4j-camel:0.7.0'
+implementation 'org.ic4j:ic4j-camel:0.8.0'
 ```
 
 To install IC4J Camel component to Apache Karavan Visual Studio Code plug-in add 
@@ -60,4 +60,4 @@ To enable the loading of IC4J libraries, you should move the [src/application.pr
 
 # Build
 
-You need JDK 17+ to build IC4J Apache Camel Internet Computer Component.
+You need JDK 21+ to build IC4J Apache Camel Internet Computer Component.
