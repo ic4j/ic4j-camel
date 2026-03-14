@@ -1,0 +1,72 @@
+methods:
+  - name: greet
+    title: Greet Tool
+    description: Stores a name in the local Motoko canister and returns the resulting greeting.
+    inputSchema:
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          description: Name to store in the Motoko canister.
+      required:
+        - name
+    outputSchema:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            type: object
+    annotations:
+      categories:
+        - internet-computer
+        - update
+  - name: get-name
+    title: Get Name Tool
+    description: Reads the current name from the local Motoko canister.
+    inputSchema:
+      type: object
+      additionalProperties: false
+      properties: {}
+    outputSchema:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            type: object
+    annotations:
+      categories:
+        - internet-computer
+        - query
+  - name: echo-pojo
+    title: Echo Pojo Tool
+    description: Round-trips a Motoko record through the local canister using Jackson serialization.
+    inputSchema:
+      type: object
+      additionalProperties: false
+      properties:
+        bar:
+          type: boolean
+          description: Boolean field in the Motoko Entry record.
+        foo:
+          type: integer
+          description: Integer field in the Motoko Entry record.
+      required:
+        - bar
+        - foo
+    outputSchema:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            type: object
+        structuredContent:
+          type: object
+    annotations:
+      categories:
+        - internet-computer
+        - query
+        - jackson

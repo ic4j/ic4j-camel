@@ -1,6 +1,8 @@
 /bin/
 /build/
 /.gradle/
+/samples/**/target/
+/samples/**/.dfx/
 /scripts/
 /secring.gpg
 /build-export.gradle

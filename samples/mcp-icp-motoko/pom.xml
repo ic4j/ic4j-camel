@@ -1,0 +1,87 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.ic4j.samples</groupId>
+    <artifactId>mcp-icp-motoko-sample</artifactId>
+    <version>0.8.0</version>
+    <name>IC4J Camel MCP Motoko Sample</name>
+    <description>MCP sample that routes tool calls to a local Motoko canister through the ic4j Camel component.</description>
+
+    <properties>
+        <camel.version>4.15.0</camel.version>
+        <camel.mcp.version>1.4.0</camel.mcp.version>
+        <ic4j.camel.version>0.8.0</ic4j.camel.version>
+        <jackson.version>2.20.0</jackson.version>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <exec.mainClass>org.apache.camel.main.Main</exec.mainClass>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>io.dscope.camel</groupId>
+            <artifactId>camel-mcp</artifactId>
+            <version>${camel.mcp.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.ic4j</groupId>
+            <artifactId>ic4j-camel</artifactId>
+            <version>${ic4j.camel.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.ic4j</groupId>
+            <artifactId>ic4j-agent</artifactId>
+            <version>${ic4j.camel.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.ic4j</groupId>
+            <artifactId>ic4j-java11transport</artifactId>
+            <version>${ic4j.camel.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.ic4j</groupId>
+            <artifactId>ic4j-candid</artifactId>
+            <version>${ic4j.camel.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-main</artifactId>
+            <version>${camel.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-yaml-dsl</artifactId>
+            <version>${camel.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-jackson</artifactId>
+            <version>${camel.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.5.6</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.5.0</version>
+                <configuration>
+                    <mainClass>${exec.mainClass}</mainClass>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

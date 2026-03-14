@@ -9,6 +9,22 @@ https://camel.apache.org/
 The IC4J Camel component allows native execution of Internet Computer smart contracts from Apache Camel.
 
 
+# Sample
+
+A local MCP plus ICP sample is available at [samples/mcp-icp-motoko/README.md](/Users/roman/Projects/eclipse-workspace/ic4j-camel/samples/mcp-icp-motoko/README.md).
+
+It reuses the existing `camel-mcp` and `ic4j-camel` components directly, with all behavior implemented in Camel YAML routes.
+
+Quick start:
+
+```bash
+cd /Users/roman/Projects/eclipse-workspace/ic4j-camel/samples/mcp-icp-motoko
+./run-local.sh
+```
+
+This starts a local `dfx` replica, deploys the sample Motoko canister, and serves an MCP endpoint at `http://localhost:3000/mcp`.
+
+
 # Downloads / Accessing Binaries
 
 To add Java IC4J Apache Camel Internet Computer Component library to your Java project use Maven or Gradle import from Maven Central.

@@ -1,0 +1,179 @@
+- route:
+    id: mcp-icp-motoko
+    from:
+      uri: mcp:http://0.0.0.0:3000/mcp
+      steps:
+        - choice:
+            when:
+              - simple: "${exchangeProperty.mcp.jsonrpc.type} == 'NOTIFICATION'"
+                steps:
+                  - setHeader:
+                      name: CamelHttpResponseCode
+                      constant: "204"
+                  - setBody:
+                      simple: "${null}"
+              - simple: "${exchangeProperty.mcp.jsonrpc.method} == 'initialize'"
+                steps:
+                  - setBody:
+                      simple: |
+                        {
+                          "jsonrpc": "2.0",
+                          "id": "${exchangeProperty.mcp.jsonrpc.id}",
+                          "result": {
+                            "protocolVersion": "2025-06-18",
+                            "serverInfo": {
+                              "name": "mcp-icp-motoko-sample",
+                              "version": "0.8.0"
+                            },
+                            "capabilities": {
+                              "tools": {}
+                            }
+                          }
+                        }
+                  - unmarshal:
+                      json:
+                        library: Jackson
+              - simple: "${exchangeProperty.mcp.jsonrpc.method} == 'ping'"
+                steps:
+                  - setBody:
+                      simple: |
+                        {
+                          "jsonrpc": "2.0",
+                          "id": "${exchangeProperty.mcp.jsonrpc.id}",
+                          "result": {
+                            "ok": true
+                          }
+                        }
+                  - unmarshal:
+                      json:
+                        library: Jackson
+              - simple: "${exchangeProperty.mcp.jsonrpc.method} == 'tools/list'"
+                steps:
+                  - bean:
+                      beanType: io.dscope.camel.mcp.processor.McpToolsListProcessor
+                      method: process
+              - simple: "${exchangeProperty.mcp.jsonrpc.method} == 'tools/call'"
+                steps:
+                  - choice:
+                      when:
+                        - simple: "${exchangeProperty.mcp.tool.name} == 'greet'"
+                          steps:
+                            - setBody:
+                                simple: "${body[name]}"
+                            - doTry:
+                                steps:
+                                  - to:
+                                      uri: "ic:oneway?url={{sample.ic.location}}&method=greet&canisterId={{sample.ic.canister}}&fetchRootKey=true"
+                                doCatch:
+                                  - exception:
+                                      - java.lang.Exception
+                                    steps:
+                                      - log:
+                                          message: "Ignoring local replica update verification error: ${exception.message}"
+                            - delay:
+                                constant: "250"
+                            - setBody:
+                                simple: "${null}"
+                            - to:
+                                uri: "ic:query?url={{sample.ic.location}}&method=getName&canisterId={{sample.ic.canister}}&fetchRootKey=true"
+                            - setBody:
+                                simple: "Hello, ${body}!"
+                            - to:
+                                uri: direct:mcp-result-text
+                        - simple: "${exchangeProperty.mcp.tool.name} == 'get-name'"
+                          steps:
+                            - setBody:
+                                simple: "${null}"
+                            - to:
+                                uri: "ic:query?url={{sample.ic.location}}&method=getName&canisterId={{sample.ic.canister}}&fetchRootKey=true"
+                            - to:
+                                uri: direct:mcp-result-text
+                        - simple: "${exchangeProperty.mcp.tool.name} == 'echo-pojo'"
+                          steps:
+                            - to:
+                                uri: "ic:query?url={{sample.ic.location}}&method=echoPojo&canisterId={{sample.ic.canister}}&inType=jackson&outType=jackson&fetchRootKey=true"
+                            - to:
+                                uri: direct:mcp-result-json
+                      otherwise:
+                        steps:
+                          - setBody:
+                              simple: |
+                                {
+                                  "jsonrpc": "2.0",
+                                  "id": "${exchangeProperty.mcp.jsonrpc.id}",
+                                  "error": {
+                                    "code": -32602,
+                                    "message": "Unknown tool: ${exchangeProperty.mcp.tool.name}"
+                                  }
+                                }
+                          - unmarshal:
+                              json:
+                                library: Jackson
+            otherwise:
+              steps:
+                - setBody:
+                    simple: |
+                      {
+                        "jsonrpc": "2.0",
+                        "id": "${exchangeProperty.mcp.jsonrpc.id}",
+                        "error": {
+                          "code": -32601,
+                          "message": "Unsupported MCP method: ${exchangeProperty.mcp.jsonrpc.method}"
+                        }
+                      }
+                - unmarshal:
+                    json:
+                      library: Jackson
+
+- route:
+    id: mcp-result-text
+    from:
+      uri: direct:mcp-result-text
+      steps:
+        - setBody:
+            simple: |
+              {
+                "jsonrpc": "2.0",
+                "id": "${exchangeProperty.mcp.jsonrpc.id}",
+                "result": {
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "${body}"
+                    }
+                  ]
+                }
+              }
+        - unmarshal:
+            json:
+              library: Jackson
+
+- route:
+    id: mcp-result-json
+    from:
+      uri: direct:mcp-result-json
+      steps:
+        - marshal:
+            json:
+              library: Jackson
+        - setProperty:
+            name: resultJson
+            simple: "${body}"
+        - setBody:
+            simple: |
+              {
+                "jsonrpc": "2.0",
+                "id": "${exchangeProperty.mcp.jsonrpc.id}",
+                "result": {
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "JSON payload returned"
+                    }
+                  ],
+                  "structuredContent": ${exchangeProperty.resultJson}
+                }
+              }
+        - unmarshal:
+            json:
+              library: Jackson
