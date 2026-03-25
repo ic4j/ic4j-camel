@@ -70,3 +70,152 @@ methods:
         - internet-computer
         - query
         - jackson
+  - name: schema-from-endpoint
+    title: Schema From Endpoint Tool
+    description: Builds an OpenAI tool schema by loading Candid from the running sample canister.
+    inputSchema:
+      type: object
+      additionalProperties: false
+      properties:
+        method:
+          type: string
+          description: Candid method name to introspect from the running canister.
+        location:
+          type: string
+          description: Optional replica URL override.
+        canisterId:
+          type: string
+          description: Optional canister id override.
+      required:
+        - method
+    outputSchema:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            type: object
+        structuredContent:
+          type: object
+    annotations:
+      categories:
+        - openai
+        - candid
+        - runtime-idl
+  - name: schema-from-did
+    title: Schema From DID Tool
+    description: Builds an OpenAI tool schema by parsing the bundled sample DID file.
+    inputSchema:
+      type: object
+      additionalProperties: false
+      properties:
+        method:
+          type: string
+          description: Candid method name to introspect from the bundled DID file.
+        didText:
+          type: string
+          description: Optional inline DID text used instead of the bundled sample DID file.
+      required:
+        - method
+    outputSchema:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            type: object
+        structuredContent:
+          type: object
+    annotations:
+      categories:
+        - openai
+        - candid
+        - did
+  - name: schema-catalog-from-endpoint
+    title: Schema Catalog From Endpoint Tool
+    description: Builds OpenAI tool schemas for every Candid method exposed by the running sample canister.
+    inputSchema:
+      type: object
+      additionalProperties: false
+      properties:
+        location:
+          type: string
+          description: Optional replica URL override.
+        canisterId:
+          type: string
+          description: Optional canister id override.
+      required: []
+    outputSchema:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            type: object
+        structuredContent:
+          type: object
+    annotations:
+      categories:
+        - openai
+        - candid
+        - runtime-idl
+        - catalog
+  - name: schema-catalog-from-did
+    title: Schema Catalog From DID Tool
+    description: Builds OpenAI tool schemas for every Candid method in the bundled sample DID file.
+    inputSchema:
+      type: object
+      additionalProperties: false
+      properties:
+        didText:
+          type: string
+          description: Optional inline DID text used instead of the bundled sample DID file.
+      required: []
+    outputSchema:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            type: object
+        structuredContent:
+          type: object
+    annotations:
+      categories:
+        - openai
+        - candid
+        - did
+        - catalog
+  - name: schema-from-pojo
+    title: Schema From Pojo Tool
+    description: Builds an OpenAI tool schema from the sample Java POJO annotated with Candid metadata.
+    inputSchema:
+      type: object
+      additionalProperties: false
+      properties:
+        toolName:
+          type: string
+          description: Name to use for the generated OpenAI tool.
+        description:
+          type: string
+          description: Description to use for the generated OpenAI tool.
+        className:
+          type: string
+          description: Optional fully-qualified Java class name to introspect instead of the default sample POJO.
+      required:
+        - toolName
+        - description
+    outputSchema:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            type: object
+        structuredContent:
+          type: object
+    annotations:
+      categories:
+        - openai
+        - candid
+        - pojo

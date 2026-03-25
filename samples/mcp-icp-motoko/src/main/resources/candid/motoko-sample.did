@@ -1,0 +1,30 @@
+type Result = variant { Ok : principal; Err : text };
+type Entry = record { bar : bool; foo : int };
+type ComplexEntry = record { bar : bool; foo : int; pojo : Entry };
+type ComplexArrayEntry = record { bar : vec bool; foo : vec int; pojo : vec Entry };
+
+service : {
+  greet : (text) -> (text);
+  getName : () -> (text) query;
+  peek : (text, int) -> (text) query;
+  void : (text) -> ();
+  echoText : (text) -> (text) query;
+  echoInt : (int) -> (int) query;
+  echoFloat : (float64) -> (float64) query;
+  echoBool : (bool) -> (bool) query;
+  echoOption : (opt int) -> (opt int) query;
+  echoVec : (vec int) -> (vec int) query;
+  echoPrincipal : (principal) -> (principal) query;
+  echoRecord : (Entry) -> (Entry) query;
+  echoVariant : (Result) -> (Result) query;
+  echoPojo : (Entry) -> (Entry) query;
+  echoOptionPojo : (opt Entry) -> (opt Entry) query;
+  echoComplexPojo : (ComplexEntry) -> (ComplexEntry) query;
+  updatePojo : (Entry) -> (Entry);
+  updateComplexPojo : (ComplexEntry) -> (ComplexEntry);
+  subComplexPojo : (ComplexEntry) -> (Entry) query;
+  echoPojoVec : (vec Entry) -> (vec Entry) query;
+  echoComplexPojoVec : (vec ComplexEntry) -> (vec ComplexEntry) query;
+  echoComplexArrayPojo : (ComplexArrayEntry) -> (ComplexArrayEntry) query;
+  getComplexArrayPojo : () -> (ComplexArrayEntry) query;
+};

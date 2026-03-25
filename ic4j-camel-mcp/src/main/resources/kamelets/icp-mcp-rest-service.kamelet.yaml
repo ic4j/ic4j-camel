@@ -1,0 +1,190 @@
+apiVersion: camel.apache.org/v1
+kind: Kamelet
+metadata:
+  name: icp-mcp-rest-service
+spec:
+  definition:
+    title: Internet Computer MCP REST Service
+    description: >-
+      MCP REST service tuned for Internet Computer use cases. Adds generated Candid schema tools,
+      generated tools/list support from DID or live endpoint metadata, and forwards business tools
+      to a user-supplied tools/call bean.
+    type: object
+    properties:
+      restComponent:
+        title: REST Component
+        type: string
+        default: undertow
+      restHost:
+        title: REST Host
+        type: string
+        default: 0.0.0.0
+      restPort:
+        title: REST Port
+        type: integer
+        default: 8080
+      restContextPath:
+        title: REST Context Path
+        type: string
+        default: /mcp
+      toolsCallBean:
+        title: Tools Call Bean
+        type: string
+        default: icpBusinessToolsCall
+      resourcesGetBean:
+        title: Resources Get Bean
+        type: string
+        default: mcpResourcesGet
+      replicaUrl:
+        title: Replica URL
+        type: string
+        default: http://127.0.0.1:4943/
+      canisterId:
+        title: Canister Id
+        type: string
+      didResource:
+        title: DID Resource
+        type: string
+        default: /candid/service.did
+      defaultPojoClass:
+        title: Default POJO Class
+        type: string
+  dependencies:
+    - "camel:{{restComponent}}"
+    - "camel:undertow"
+    - "camel:bean"
+  template:
+    beans:
+      - name: mcpJsonRpcEnvelope
+        type: io.dscope.camel.mcp.processor.McpJsonRpcEnvelopeProcessor
+      - name: mcpInitialize
+        type: io.dscope.camel.mcp.processor.McpInitializeProcessor
+      - name: mcpPing
+        type: io.dscope.camel.mcp.processor.McpPingProcessor
+      - name: mcpResourcesGet
+        type: io.dscope.camel.mcp.processor.McpResourcesGetProcessor
+      - name: mcpResourcesList
+        type: io.dscope.camel.mcp.processor.McpResourcesListProcessor
+      - name: mcpResourcesRead
+        type: io.dscope.camel.mcp.processor.McpResourcesReadProcessor
+      - name: mcpStream
+        type: io.dscope.camel.mcp.processor.McpStreamProcessor
+      - name: mcpHealthStatus
+        type: io.dscope.camel.mcp.processor.McpHealthStatusProcessor
+      - name: mcpNotification
+        type: io.dscope.camel.mcp.processor.McpNotificationProcessor
+      - name: mcpNotificationsInitialized
+        type: io.dscope.camel.mcp.processor.McpNotificationsInitializedProcessor
+      - name: mcpNotificationAck
+        type: io.dscope.camel.mcp.processor.McpNotificationAckProcessor
+      - name: mcpError
+        type: io.dscope.camel.mcp.processor.McpErrorProcessor
+      - name: mcpRateLimit
+        type: io.dscope.camel.mcp.processor.McpRateLimitProcessor
+      - name: mcpRequestSizeGuard
+        type: io.dscope.camel.mcp.processor.McpRequestSizeGuardProcessor
+      - name: icpMcpToolsList
+        type: org.ic4j.camel.mcp.processor.IcpMcpToolsListProcessor
+      - name: icpMcpSchemaToolsCall
+        type: org.ic4j.camel.mcp.processor.IcpMcpSchemaToolCallProcessor
+    from:
+      uri: "{{restComponent}}:http://{{restHost}}:{{restPort}}{{restContextPath}}?matchOnUriPrefix=true"
+      steps:
+        - setProperty:
+            name: icp.mcp.location
+            constant: "{{replicaUrl}}"
+        - setProperty:
+            name: icp.mcp.canisterId
+            constant: "{{canisterId}}"
+        - setProperty:
+            name: icp.mcp.didResource
+            constant: "{{didResource}}"
+        - setProperty:
+            name: icp.mcp.defaultPojoClass
+            constant: "{{defaultPojoClass}}"
+        - choice:
+            when:
+              - simple: "${header.CamelHttpMethod} == 'GET' && ${header.CamelHttpPath} endsWith '/health'"
+                steps:
+                  - process:
+                      ref: mcpHealthStatus
+                  - setHeader:
+                      name: Content-Type
+                      constant: application/json
+                  - convertBodyTo:
+                      type: java.lang.String
+              - simple: "${header.CamelHttpMethod} == 'GET' && ${header.CamelHttpPath} endsWith '/stream'"
+                steps:
+                  - process:
+                      ref: mcpStream
+              - simple: "${header.CamelHttpMethod} == 'POST'"
+                steps:
+                  - doTry:
+                      steps:
+                        - to: "bean:mcpJsonRpcEnvelope"
+                        - choice:
+                            when:
+                              - simple: "${exchangeProperty[mcp.jsonrpc.type]} == 'NOTIFICATION'"
+                                steps:
+                                  - to: "bean:mcpNotification"
+                                  - choice:
+                                      when:
+                                        - simple: "${exchangeProperty[mcp.notification.type]} == 'initialized'"
+                                          steps:
+                                            - to: "bean:mcpNotificationsInitialized"
+                                      otherwise:
+                                        steps:
+                                          - to: "bean:mcpNotificationAck"
+                              - simple: "${exchangeProperty[mcp.jsonrpc.method]} == 'initialize'"
+                                steps:
+                                  - to: mcpInitialize
+                              - simple: "${exchangeProperty[mcp.jsonrpc.method]} == 'ping'"
+                                steps:
+                                  - to: mcpPing
+                              - simple: "${exchangeProperty[mcp.jsonrpc.method]} == 'tools/list'"
+                                steps:
+                                  - to: "bean:icpMcpToolsList"
+                              - simple: "${exchangeProperty[mcp.jsonrpc.method]} == 'tools/call'"
+                                steps:
+                                  - choice:
+                                      when:
+                                        - simple: "${bean:icpMcpSchemaToolsCall?method=supports}"
+                                          steps:
+                                            - to: "bean:icpMcpSchemaToolsCall"
+                                      otherwise:
+                                        steps:
+                                          - to: "bean:{{toolsCallBean}}"
+                              - simple: "${exchangeProperty[mcp.jsonrpc.method]} == 'resources/list'"
+                                steps:
+                                  - to: mcpResourcesList
+                              - simple: "${exchangeProperty[mcp.jsonrpc.method]} == 'resources/read'"
+                                steps:
+                                  - to: mcpResourcesRead
+                              - simple: "${exchangeProperty[mcp.jsonrpc.method]} == 'resources/get'"
+                                steps:
+                                  - to: "bean:{{resourcesGetBean}}"
+                            otherwise:
+                              steps:
+                                - setProperty:
+                                    name: mcp.error.code
+                                    constant: "-32601"
+                                - setProperty:
+                                    name: mcp.error.message
+                                    simple: "Unsupported MCP method: ${exchangeProperty[mcp.jsonrpc.method]}"
+                                - process:
+                                    ref: mcpError
+                      doCatch:
+                        - exception:
+                            - java.lang.IllegalArgumentException
+                          steps:
+                            - setHeader:
+                                name: CamelHttpResponseCode
+                                constant: "400"
+                            - setProperty:
+                                name: mcp.error.code
+                                constant: "-32600"
+                            - setProperty:
+                                name: mcp.error.message
+                                simple: "${exception.message}"
+                            - process:
+                                ref: mcpError

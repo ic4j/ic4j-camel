@@ -3,6 +3,18 @@
     from:
       uri: mcp:http://0.0.0.0:3000/mcp
       steps:
+        - setProperty:
+            name: icp.mcp.location
+            simple: "{{sample.ic.location}}"
+        - setProperty:
+            name: icp.mcp.canisterId
+            simple: "{{sample.ic.canister}}"
+        - setProperty:
+            name: icp.mcp.didResource
+            constant: "/candid/motoko-sample.did"
+        - setProperty:
+            name: icp.mcp.defaultPojoClass
+            constant: "org.ic4j.sample.mcp.SampleEntryPojo"
         - choice:
             when:
               - simple: "${exchangeProperty.mcp.jsonrpc.type} == 'NOTIFICATION'"
@@ -50,7 +62,7 @@
               - simple: "${exchangeProperty.mcp.jsonrpc.method} == 'tools/list'"
                 steps:
                   - bean:
-                      beanType: io.dscope.camel.mcp.processor.McpToolsListProcessor
+                      beanType: org.ic4j.camel.mcp.processor.IcpMcpToolsListProcessor
                       method: process
               - simple: "${exchangeProperty.mcp.jsonrpc.method} == 'tools/call'"
                 steps:
@@ -94,6 +106,31 @@
                                 uri: "ic:query?url={{sample.ic.location}}&method=echoPojo&canisterId={{sample.ic.canister}}&inType=jackson&outType=jackson&loadIDL=true&fetchRootKey=true"
                             - to:
                                 uri: direct:mcp-result-json
+                        - simple: "${exchangeProperty.mcp.tool.name} == 'schema-from-endpoint'"
+                          steps:
+                            - bean:
+                                beanType: org.ic4j.camel.mcp.processor.IcpMcpSchemaToolCallProcessor
+                                method: process
+                        - simple: "${exchangeProperty.mcp.tool.name} == 'schema-from-did'"
+                          steps:
+                            - bean:
+                                beanType: org.ic4j.camel.mcp.processor.IcpMcpSchemaToolCallProcessor
+                                method: process
+                        - simple: "${exchangeProperty.mcp.tool.name} == 'schema-catalog-from-endpoint'"
+                          steps:
+                            - bean:
+                                beanType: org.ic4j.camel.mcp.processor.IcpMcpSchemaToolCallProcessor
+                                method: process
+                        - simple: "${exchangeProperty.mcp.tool.name} == 'schema-catalog-from-did'"
+                          steps:
+                            - bean:
+                                beanType: org.ic4j.camel.mcp.processor.IcpMcpSchemaToolCallProcessor
+                                method: process
+                        - simple: "${exchangeProperty.mcp.tool.name} == 'schema-from-pojo'"
+                          steps:
+                            - bean:
+                                beanType: org.ic4j.camel.mcp.processor.IcpMcpSchemaToolCallProcessor
+                                method: process
                       otherwise:
                         steps:
                           - setBody:

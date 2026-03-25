@@ -1,3 +1,9 @@
 {
-    "java.debug.settings.onBuildFailureProceed": true
+    "java.debug.settings.onBuildFailureProceed": true,
+    "chat.tools.terminal.autoApprove": {
+        "/^cp src/generated/resources/META-INF/org/ic4j/camel/ic\\.json ic4j-camel-core/src/generated/resources/META-INF/org/ic4j/camel/ic\\.json && perl -0pi -e 's/\"artifactId\": \"ic4j-camel\"/\"artifactId\": \"ic4j-camel-core\"/; s/Apache Camel Internet Computer Component/Apache Camel Internet Computer component core module/' ic4j-camel-core/src/generated/resources/META-INF/org/ic4j/camel/ic\\.json$/": {
+            "approve": true,
+            "matchCommandLine": true
+        }
+    }
 }

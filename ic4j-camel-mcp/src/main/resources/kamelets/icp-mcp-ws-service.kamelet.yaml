@@ -1,0 +1,171 @@
+apiVersion: camel.apache.org/v1
+kind: Kamelet
+metadata:
+  name: icp-mcp-ws-service
+spec:
+  definition:
+    title: Internet Computer MCP WebSocket Service
+    description: >-
+      MCP WebSocket service for Internet Computer workloads. Supports generated Candid tools and
+      forwards business tool execution to a user-provided bean.
+    type: object
+    properties:
+      wsComponent:
+        title: WebSocket Component
+        type: string
+        default: undertow
+      wsHost:
+        title: WebSocket Host
+        type: string
+        default: 0.0.0.0
+      wsPort:
+        title: WebSocket Port
+        type: integer
+        default: 8090
+      wsPath:
+        title: WebSocket Path
+        type: string
+        default: /mcp
+      toolsCallBean:
+        title: Tools Call Bean
+        type: string
+        default: icpBusinessToolsCall
+      resourcesGetBean:
+        title: Resources Get Bean
+        type: string
+        default: mcpResourcesGet
+      replicaUrl:
+        title: Replica URL
+        type: string
+        default: http://127.0.0.1:4943/
+      canisterId:
+        title: Canister Id
+        type: string
+      didResource:
+        title: DID Resource
+        type: string
+        default: /candid/service.did
+      defaultPojoClass:
+        title: Default POJO Class
+        type: string
+  dependencies:
+    - "camel:{{wsComponent}}"
+    - "camel:undertow"
+    - "camel:bean"
+  template:
+    beans:
+      - name: mcpJsonRpcEnvelope
+        type: io.dscope.camel.mcp.processor.McpJsonRpcEnvelopeProcessor
+      - name: mcpInitialize
+        type: io.dscope.camel.mcp.processor.McpInitializeProcessor
+      - name: mcpPing
+        type: io.dscope.camel.mcp.processor.McpPingProcessor
+      - name: mcpResourcesGet
+        type: io.dscope.camel.mcp.processor.McpResourcesGetProcessor
+      - name: mcpResourcesList
+        type: io.dscope.camel.mcp.processor.McpResourcesListProcessor
+      - name: mcpResourcesRead
+        type: io.dscope.camel.mcp.processor.McpResourcesReadProcessor
+      - name: mcpNotification
+        type: io.dscope.camel.mcp.processor.McpNotificationProcessor
+      - name: mcpError
+        type: io.dscope.camel.mcp.processor.McpErrorProcessor
+      - name: mcpRateLimit
+        type: io.dscope.camel.mcp.processor.McpRateLimitProcessor
+      - name: mcpRequestSizeGuard
+        type: io.dscope.camel.mcp.processor.McpRequestSizeGuardProcessor
+      - name: icpMcpToolsList
+        type: org.ic4j.camel.mcp.processor.IcpMcpToolsListProcessor
+      - name: icpMcpSchemaToolsCall
+        type: org.ic4j.camel.mcp.processor.IcpMcpSchemaToolCallProcessor
+    from:
+      uri: "{{wsComponent}}:ws://{{wsHost}}:{{wsPort}}{{wsPath}}?sendToAll=false&allowedOrigins=*&exchangePattern=InOut"
+      steps:
+        - setProperty:
+            name: icp.mcp.location
+            constant: "{{replicaUrl}}"
+        - setProperty:
+            name: icp.mcp.canisterId
+            constant: "{{canisterId}}"
+        - setProperty:
+            name: icp.mcp.didResource
+            constant: "{{didResource}}"
+        - setProperty:
+            name: icp.mcp.defaultPojoClass
+            constant: "{{defaultPojoClass}}"
+        - process:
+            ref: mcpRequestSizeGuard
+        - process:
+            ref: mcpRateLimit
+        - doTry:
+            steps:
+              - to: "bean:mcpJsonRpcEnvelope"
+              - choice:
+                  when:
+                    - simple: "${exchangeProperty[mcp.jsonrpc.type]} == 'NOTIFICATION'"
+                      steps:
+                        - to: "bean:mcpNotification"
+                        - stop: {}
+                    - simple: "${exchangeProperty[mcp.jsonrpc.method]} == 'initialize'"
+                      steps:
+                        - to: mcpInitialize
+                    - simple: "${exchangeProperty[mcp.jsonrpc.method]} == 'ping'"
+                      steps:
+                        - to: mcpPing
+                    - simple: "${exchangeProperty[mcp.jsonrpc.method]} == 'tools/list'"
+                      steps:
+                        - to: "bean:icpMcpToolsList"
+                    - simple: "${exchangeProperty[mcp.jsonrpc.method]} == 'tools/call'"
+                      steps:
+                        - choice:
+                            when:
+                              - simple: "${bean:icpMcpSchemaToolsCall?method=supports}"
+                                steps:
+                                  - to: "bean:icpMcpSchemaToolsCall"
+                            otherwise:
+                              steps:
+                                - to: "bean:{{toolsCallBean}}"
+                    - simple: "${exchangeProperty[mcp.jsonrpc.method]} == 'resources/list'"
+                      steps:
+                        - to: mcpResourcesList
+                    - simple: "${exchangeProperty[mcp.jsonrpc.method]} == 'resources/read'"
+                      steps:
+                        - to: mcpResourcesRead
+                    - simple: "${exchangeProperty[mcp.jsonrpc.method]} == 'resources/get'"
+                      steps:
+                        - to: "bean:{{resourcesGetBean}}"
+                  otherwise:
+                    steps:
+                      - setProperty:
+                          name: mcp.error.code
+                          constant: "-32601"
+                      - setProperty:
+                          name: mcp.error.message
+                          simple: "Unsupported MCP method: ${exchangeProperty[mcp.jsonrpc.method]}"
+                      - process:
+                          ref: mcpError
+            doCatch:
+              - exception:
+                  - java.lang.IllegalArgumentException
+                steps:
+                  - setProperty:
+                      name: mcp.error.code
+                      constant: "-32600"
+                  - setProperty:
+                      name: mcp.error.message
+                      simple: "${exception.message}"
+                  - process:
+                      ref: mcpError
+        - choice:
+            when:
+              - simple: "${header.Content-Type} == null"
+                steps:
+                  - setHeader:
+                      name: Content-Type
+                      constant: application/json
+        - convertBodyTo:
+            type: java.lang.String
+        - setHeader:
+            name: CamelWebSocketSendToAll
+            constant: "false"
+        - to: "{{wsComponent}}:ws://{{wsHost}}:{{wsPort}}{{wsPath}}"

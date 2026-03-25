@@ -11,8 +11,9 @@
 
     <properties>
         <camel.version>4.15.0</camel.version>
-        <camel.mcp.version>1.4.0</camel.mcp.version>
-        <ic4j.camel.version>0.8.0</ic4j.camel.version>
+        <camel.mcp.version>1.4.1</camel.mcp.version>
+        <ic4j.camel.version>0.8.1</ic4j.camel.version>
+        <ic4j.base.version>0.8.0</ic4j.base.version>
         <jackson.version>2.20.0</jackson.version>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
@@ -27,23 +28,28 @@
         </dependency>
         <dependency>
             <groupId>org.ic4j</groupId>
-            <artifactId>ic4j-camel</artifactId>
+            <artifactId>ic4j-camel-core</artifactId>
+            <version>${ic4j.camel.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.ic4j</groupId>
+            <artifactId>ic4j-camel-mcp</artifactId>
             <version>${ic4j.camel.version}</version>
         </dependency>
         <dependency>
             <groupId>org.ic4j</groupId>
             <artifactId>ic4j-agent</artifactId>
-            <version>${ic4j.camel.version}</version>
+            <version>${ic4j.base.version}</version>
         </dependency>
         <dependency>
             <groupId>org.ic4j</groupId>
             <artifactId>ic4j-java11transport</artifactId>
-            <version>${ic4j.camel.version}</version>
+            <version>${ic4j.base.version}</version>
         </dependency>
         <dependency>
             <groupId>org.ic4j</groupId>
             <artifactId>ic4j-candid</artifactId>
-            <version>${ic4j.camel.version}</version>
+            <version>${ic4j.base.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.camel</groupId>
