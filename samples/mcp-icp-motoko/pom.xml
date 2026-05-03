@@ -5,14 +5,14 @@
 
     <groupId>org.ic4j.samples</groupId>
     <artifactId>mcp-icp-motoko-sample</artifactId>
-    <version>0.8.0</version>
+    <version>0.8.2</version>
     <name>IC4J Camel MCP Motoko Sample</name>
     <description>MCP sample that routes tool calls to a local Motoko canister through the ic4j Camel component.</description>
 
     <properties>
-        <camel.version>4.15.0</camel.version>
+        <camel.version>4.20.0</camel.version>
         <camel.mcp.version>1.4.1</camel.mcp.version>
-        <ic4j.camel.version>0.8.1</ic4j.camel.version>
+        <ic4j.camel.version>0.8.2</ic4j.camel.version>
         <ic4j.base.version>0.8.0</ic4j.base.version>
         <jackson.version>2.20.0</jackson.version>
         <maven.compiler.source>21</maven.compiler.source>

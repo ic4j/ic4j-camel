@@ -11,7 +11,7 @@
     "supportLevel": "Preview",
     "groupId": "org.ic4j",
     "artifactId": "ic4j-camel",
-    "version": "0.8.1",
+    "version": "0.8.2",
     "scheme": "ic",
     "extendsScheme": "",
     "syntax": "ic:canister",

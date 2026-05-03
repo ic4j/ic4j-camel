@@ -3,7 +3,7 @@
   <parent>
     <artifactId>ic4j-camel-parent</artifactId>
     <groupId>org.ic4j</groupId>
-    <version>0.8.1</version>
+    <version>0.8.2</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>ic4j-camel-core</artifactId>
@@ -166,7 +166,7 @@
     <dependency>
       <groupId>org.apache.camel</groupId>
       <artifactId>camel-test-junit5</artifactId>
-      <version>4.15.0</version>
+      <version>4.20.0</version>
       <scope>test</scope>
       <exclusions>
         <exclusion>

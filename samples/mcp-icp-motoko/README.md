@@ -27,7 +27,7 @@ cd /Users/roman/Projects/eclipse-workspace/ic4j-camel
 mvn -DskipTests install
 ```
 
-This sample resolves `org.ic4j:ic4j-camel-core:0.8.1` and `org.ic4j:ic4j-camel-mcp:0.8.1` from your local Maven repository. It still uses the base `org.ic4j` libraries such as `ic4j-agent`, `ic4j-java11transport`, and `ic4j-candid` at `0.8.0`, because the Camel-only version bump in this repository does not require a matching base library release. If you change code or resources in the root project and want the sample to pick them up, rerun `mvn -DskipTests install` from the repository root before restarting the sample.
+This sample resolves `org.ic4j:ic4j-camel-core:0.8.2` and `org.ic4j:ic4j-camel-mcp:0.8.2` from your local Maven repository. It still uses the base `org.ic4j` libraries such as `ic4j-agent`, `ic4j-java11transport`, and `ic4j-candid` at `0.8.0`, because this repository release only bumps the Camel artifacts. If you change code or resources in the root project and want the sample to pick them up, rerun `mvn -DskipTests install` from the repository root before restarting the sample.
 
 ## Build And Test
 

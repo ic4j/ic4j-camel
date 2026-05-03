@@ -40,27 +40,27 @@ When testing that endpoint with `curl`, send `Accept: application/json, text/eve
 
 To add Java IC4J Apache Camel Internet Computer Component library to your Java project use Maven or Gradle import from Maven Central.
 
-<a href="https://search.maven.org/artifact/ic4j/ic4j-camel/0.8.1/jar">
-https://search.maven.org/artifact/ic4j/ic4j-camel/0.8.1/jar
+<a href="https://search.maven.org/artifact/ic4j/ic4j-camel/0.8.2/jar">
+https://search.maven.org/artifact/ic4j/ic4j-camel/0.8.2/jar
 </a>
 
 ```
 <dependency>
   <groupId>org.ic4j</groupId>
   <artifactId>ic4j-camel-core</artifactId>
-  <version>0.8.1</version>
+  <version>0.8.2</version>
 </dependency>
 
 <dependency>
   <groupId>org.ic4j</groupId>
   <artifactId>ic4j-camel-mcp</artifactId>
-  <version>0.8.1</version>
+  <version>0.8.2</version>
 </dependency>
 ```
 
 ```
-implementation 'org.ic4j:ic4j-camel-core:0.8.1'
-implementation 'org.ic4j:ic4j-camel-mcp:0.8.1'
+implementation 'org.ic4j:ic4j-camel-core:0.8.2'
+implementation 'org.ic4j:ic4j-camel-mcp:0.8.2'
 ```
 
 To install IC4J Camel component to Apache Karavan Visual Studio Code plug-in add 

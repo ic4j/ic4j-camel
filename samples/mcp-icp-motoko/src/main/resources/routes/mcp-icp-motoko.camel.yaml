@@ -35,7 +35,7 @@
                             "protocolVersion": "2025-06-18",
                             "serverInfo": {
                               "name": "mcp-icp-motoko-sample",
-                              "version": "0.8.0"
+                              "version": "0.8.2"
                             },
                             "capabilities": {
                               "tools": {}

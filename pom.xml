@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.ic4j</groupId>
 	<artifactId>ic4j-camel-parent</artifactId>
-	<version>0.8.1</version>
+	<version>0.8.2</version>
 	<packaging>pom</packaging>
 	<name>IC4J Camel Parent</name>
 	<description>Parent reactor for Internet Computer Camel core and MCP modules</description>
@@ -17,7 +17,7 @@
 		<ic4j.agent.version>0.8.0</ic4j.agent.version>
 		<ic4j.candid.version>0.8.0</ic4j.candid.version>
 		<slf4j.version>2.0.16</slf4j.version>
-		<camel.version>4.15.0</camel.version>
+		<camel.version>4.20.0</camel.version>
 		<maven.compiler.source>21</maven.compiler.source>
 		<maven.compiler.target>${maven.compiler.source}</maven.compiler.target>
         <!-- plugin versions -->
