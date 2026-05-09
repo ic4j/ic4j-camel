@@ -15,7 +15,7 @@
   <description>Reusable Internet Computer MCP processors, schema builders, and kamelets</description>
 
   <properties>
-    <camel.mcp.version>1.4.1</camel.mcp.version>
+    <camel.mcp.version>1.5.0</camel.mcp.version>
   </properties>
 
   <dependencies>

@@ -85,6 +85,8 @@ mvn exec:java \
   -Dsample.ic.canister="$CANISTER_ID"
 ```
 
+The sample Camel routes call the local ICP replica with `fetchRootKey=true`; keep that endpoint option enabled for local `dfx` replicas.
+
 ## MCP Tools
 
 - `greet`: submits the Motoko `greet` mutation and then queries `getName` to return the current greeting through MCP
@@ -99,7 +101,7 @@ The reusable kamelet provides `initialize`, `ping`, generated `tools/list`, and 
 - The alternate kamelet variant adds one small Java processor because the kamelet delegates sample-specific business tools to a bean while keeping shared MCP behavior reusable.
 - The sample runs from its compiled resources plus the installed Maven-local `ic4j-camel-core` and `ic4j-camel-mcp` jars, not directly from the root reactor `target/classes`.
 - The schema tools and generated `tools/list` output now come from the reusable ICP MCP processors in this repository, not from sample-local helper code.
-- On a local `dfx` replica, update calls can still emit certificate verification noise from the underlying agent. The sample route tolerates that for the `greet` demo and reads back state with `getName`.
+- On a local `dfx` replica, keep `fetchRootKey=true` on `ic:` endpoints so the agent trusts the replica root key.
 - The `camel-mcp` consumer uses MCP streamable HTTP validation. Your client must send `Accept: application/json, text/event-stream` and should send `MCP-Protocol-Version: 2025-06-18` on POST requests.
 - If you omit the `Accept` header, the current `camel-mcp` consumer can respond with an empty `200 OK` before the route logic runs. That symptom usually means the HTTP transport headers were wrong, not that the sample route failed.
 
