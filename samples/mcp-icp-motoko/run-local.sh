@@ -34,5 +34,6 @@ PY
 )"
 
 exec mvn exec:java \
+  -Dicp.mcp.fetchRootKey=true \
   -Dsample.ic.location=http://127.0.0.1:4943/ \
   -Dsample.ic.canister="$CANISTER_ID"

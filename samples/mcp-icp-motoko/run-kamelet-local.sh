@@ -36,6 +36,7 @@ PY
 exec mvn exec:java \
   -Dsample.ic.location=http://127.0.0.1:4943/ \
   -Dsample.ic.canister="$CANISTER_ID" \
+  -Dicp.mcp.fetchRootKey=true \
   -Dcamel.main.name=mcp-icp-motoko-kamelet \
   -Dcamel.main.routesIncludePattern=classpath:kamelets/*.kamelet.yaml \
   -Dcamel.component.kamelet.location=classpath:kamelets \

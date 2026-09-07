@@ -3,18 +3,24 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <parent>
+        <groupId>org.ic4j</groupId>
+        <artifactId>ic4j-camel-parent</artifactId>
+        <version>0.8.5</version>
+        <relativePath>../../pom.xml</relativePath>
+    </parent>
+
     <groupId>org.ic4j.samples</groupId>
     <artifactId>mcp-icp-motoko-sample</artifactId>
-    <version>0.8.2</version>
+    <version>0.8.5</version>
     <name>IC4J Camel MCP Motoko Sample</name>
     <description>MCP sample that routes tool calls to a local Motoko canister through the ic4j Camel component.</description>
 
     <properties>
-        <camel.version>4.20.0</camel.version>
         <camel.mcp.version>1.5.0</camel.mcp.version>
-        <ic4j.camel.version>0.8.2</ic4j.camel.version>
-        <ic4j.base.version>0.8.0</ic4j.base.version>
-        <jackson.version>2.20.0</jackson.version>
+        <ic4j.camel.version>0.8.5</ic4j.camel.version>
+        <ic4j.base.version>0.8.5</ic4j.base.version>
+        <jackson.version>2.22.2</jackson.version>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <exec.mainClass>org.apache.camel.main.Main</exec.mainClass>
@@ -74,7 +80,7 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.5.6</version>
+            <version>1.6.3</version>
         </dependency>
     </dependencies>
 
@@ -83,7 +89,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
-                <version>3.5.0</version>
+                <version>3.6.3</version>
                 <configuration>
                     <mainClass>${exec.mainClass}</mainClass>
                 </configuration>

@@ -48,6 +48,7 @@ public class CandidToolSchemaService {
 	public static final String PROPERTY_CANISTER_ID = "icp.mcp.canisterId";
 	public static final String PROPERTY_DID_RESOURCE = "icp.mcp.didResource";
 	public static final String PROPERTY_DEFAULT_POJO_CLASS = "icp.mcp.defaultPojoClass";
+	public static final String PROPERTY_FETCH_ROOT_KEY = "icp.mcp.fetchRootKey";
 
 	public Map<String, Object> fromEndpoint(Map<String, Object> arguments) throws Exception {
 		String methodName = requiredString(arguments, "method");
@@ -113,7 +114,7 @@ public class CandidToolSchemaService {
 			throw new IllegalArgumentException("Missing required argument: className");
 		}
 
-		Class<?> pojoClass = Class.forName(className);
+		Class<?> pojoClass = Class.forName(className, false, getClass().getClassLoader());
 		Map<String, Object> schema = schemaFromPojo(pojoClass);
 		MethodSchema methodSchema = new MethodSchema(schema, schema, List.of());
 		return toOpenAiTool(toolName, description, methodSchema,
@@ -122,9 +123,20 @@ public class CandidToolSchemaService {
 
 	private String loadDidFromEndpoint(String location, String canisterId) throws Exception {
 		ReplicaTransport transport = ReplicaJavaHttpTransport.create(location);
+		try {
+			Agent agent = createAgent(transport);
+			return agent.getIDL(Principal.fromString(canisterId));
+		} finally {
+			transport.close();
+		}
+	}
+
+	Agent createAgent(ReplicaTransport transport) {
 		Agent agent = new AgentBuilder().transport(transport).identity(new AnonymousIdentity()).build();
-		agent.fetchRootKey();
-		return agent.getIDL(Principal.fromString(canisterId));
+		if (Boolean.getBoolean(PROPERTY_FETCH_ROOT_KEY)) {
+			agent.fetchRootKey();
+		}
+		return agent;
 	}
 
 	private String resolveDidText(Map<String, Object> arguments) throws IOException {

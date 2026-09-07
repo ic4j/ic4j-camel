@@ -33,7 +33,13 @@ public class IcpMcpSchemaToolCallProcessor extends AbstractMcpRequestProcessor {
 	@Override
 	protected void handleRequest(Exchange exchange, Map<String, Object> parameters) throws Exception {
 		String toolName = getToolName(exchange);
-		Map<String, Object> merged = withDefaults(exchange, parameters);
+		Map<String, Object> merged;
+		try {
+			merged = withDefaults(exchange, parameters);
+		} catch (IllegalArgumentException exception) {
+			writeError(exchange, -32602, exception.getMessage(), 400);
+			return;
+		}
 		Map<String, Object> payload = switch (toolName) {
 		case "schema-from-endpoint" -> schemaService.fromEndpoint(merged);
 		case "schema-from-did" -> schemaService.fromDid(merged);
@@ -55,30 +61,8 @@ public class IcpMcpSchemaToolCallProcessor extends AbstractMcpRequestProcessor {
 		return SUPPORTED_TOOLS.contains(getToolName(exchange));
 	}
 
-	private Map<String, Object> withDefaults(Exchange exchange, Map<String, Object> parameters) {
-		Map<String, Object> merged = new LinkedHashMap<>();
-		if (parameters != null) {
-			merged.putAll(parameters);
-		}
-		applyDefault(exchange, merged, "location", CandidToolSchemaService.PROPERTY_LOCATION);
-		applyDefault(exchange, merged, "canisterId", CandidToolSchemaService.PROPERTY_CANISTER_ID);
-		applyDefault(exchange, merged, "didResource", CandidToolSchemaService.PROPERTY_DID_RESOURCE);
-		applyDefault(exchange, merged, "className", CandidToolSchemaService.PROPERTY_DEFAULT_POJO_CLASS);
-		return merged;
-	}
-
-	private void applyDefault(Exchange exchange, Map<String, Object> merged, String argumentName, String propertyName) {
-		if (hasValue(merged.get(argumentName))) {
-			return;
-		}
-		Object exchangeValue = exchange.getProperty(propertyName);
-		if (exchangeValue != null) {
-			merged.put(argumentName, exchangeValue);
-		}
-	}
-
-	private boolean hasValue(Object value) {
-		return value != null && !value.toString().isBlank();
+	Map<String, Object> withDefaults(Exchange exchange, Map<String, Object> parameters) {
+		return SchemaArguments.configured(exchange, parameters);
 	}
 
 	private void writeStructuredResult(Exchange exchange, Map<String, Object> payload) {

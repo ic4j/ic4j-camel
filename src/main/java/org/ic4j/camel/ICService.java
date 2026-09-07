@@ -56,8 +56,6 @@ import org.ic4j.candid.pojo.PojoSerializer;
 import org.ic4j.candid.types.Mode;
 import org.ic4j.types.Func;
 import org.ic4j.types.Principal;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.w3c.dom.Node;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -65,7 +63,6 @@ import com.google.gson.JsonElement;
 
 public class ICService {
 	
-	private static final Logger LOG = LoggerFactory.getLogger(ICService.class);	
 	static int WAITER_TIMEOUT = 60;
 	static int WAITER_SLEEP = 5;
 	
@@ -88,12 +85,13 @@ public class ICService {
 		String transportType = endpoint.getTransportType();
 	
 		
-		ReplicaTransport transport;
+		ReplicaTransport transport = endpoint.getTransport();
 		
 		String url = endpoint.getUrl();
 		
 		try {
 		
+		if (transport == null) {
 		switch (transportType) {
 		case "okhttp":
 			transport = ReplicaOkHttpTransport.create(url);
@@ -101,18 +99,22 @@ public class ICService {
 		case "apache":
 			transport = ReplicaApacheHttpTransport.create(url);		
 			break;
-		default:
+		case "java":
 			transport = ReplicaJavaHttpTransport.create(url);
 			break;
+		default:
+			throw new IllegalArgumentException("Unsupported transport type: " + transportType);
+		}
 		}
 		
 		String identityType = endpoint.getIdentityType();
 		
-		Identity identity;
+		Identity identity = endpoint.getIdentity();
 		
 		
 		String pemFileName = endpoint.getPemFile();
 		
+		if (identity == null) {
 		switch (identityType) {
 		case "basic":		
 			if(pemFileName == null)
@@ -129,9 +131,12 @@ public class ICService {
 		case "prime256v1":				
 			identity = Prime256v1Identity.fromPEMFile(Paths.get(pemFileName));	
 		break;				
-		default:
+		case "anonymous":
 			identity = new AnonymousIdentity();
 			break;
+		default:
+			throw new IllegalArgumentException("Unsupported identity type: " + identityType);
+		}
 		}
 			
 		
@@ -142,7 +147,7 @@ public class ICService {
 			this.agent = new AgentBuilder().transport(transport).identity(identity).nonceFactory(new NonceFactory()).ingresExpiry(endpoint.getIngressExpiryDuration())
 			.build();	
 		
-		if(endpoint.getFetchRootKey())
+		if(Boolean.TRUE.equals(endpoint.getFetchRootKey()))
 			this.agent.fetchRootKey();
 		
 		if(endpoint.getWaiterTimeout() != null)
@@ -154,7 +159,7 @@ public class ICService {
 		this.proxyBuilder = ProxyBuilder.create(agent);
 		
 		} catch (Exception e) {
-			LOG.error(e.getLocalizedMessage(), e);
+			throw new IllegalStateException("Cannot initialize Internet Computer service", e);
 		}
 	}
 	

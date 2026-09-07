@@ -6,7 +6,7 @@
   <parent>
     <groupId>org.ic4j</groupId>
     <artifactId>ic4j-camel-parent</artifactId>
-    <version>0.8.2</version>
+    <version>0.8.5</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -45,7 +45,7 @@
     </dependency>
     <dependency>
       <groupId>com.squareup.okhttp3</groupId>
-      <artifactId>okhttp</artifactId>
+      <artifactId>okhttp-jvm</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>
@@ -115,7 +115,7 @@
     <testSourceDirectory>../src/test/java</testSourceDirectory>
     <resources>
       <resource>
-        <directory>../src/generated/java</directory>
+        <directory>src/generated/java</directory>
       </resource>
       <resource>
         <directory>../src/main/resources</directory>
@@ -179,11 +179,11 @@
             </goals>
             <configuration>
               <sources>
-                <source>../src/generated/java</source>
+                <source>src/generated/java</source>
               </sources>
               <resources>
                 <resource>
-                  <directory>../src/generated/resources</directory>
+                  <directory>src/generated/resources</directory>
                 </resource>
               </resources>
             </configuration>
@@ -203,6 +203,7 @@
             <configuration>
               <shadedArtifactAttached>true</shadedArtifactAttached>
               <shadedClassifierName>with-dependencies</shadedClassifierName>
+              <createDependencyReducedPom>false</createDependencyReducedPom>
             </configuration>
           </execution>
         </executions>

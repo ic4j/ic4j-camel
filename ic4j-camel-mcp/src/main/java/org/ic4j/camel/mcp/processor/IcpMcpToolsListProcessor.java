@@ -1,6 +1,5 @@
 package org.ic4j.camel.mcp.processor;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.apache.camel.BindToRegistry;
@@ -40,30 +39,8 @@ public class IcpMcpToolsListProcessor extends AbstractMcpResponseProcessor {
 		defaultToolsListProcessor.process(exchange);
 	}
 
-	private Map<String, Object> withDefaults(Exchange exchange, Map<String, Object> parameters) {
-		Map<String, Object> merged = new LinkedHashMap<>();
-		if (parameters != null) {
-			merged.putAll(parameters);
-		}
-		applyDefault(exchange, merged, "location", CandidToolSchemaService.PROPERTY_LOCATION);
-		applyDefault(exchange, merged, "canisterId", CandidToolSchemaService.PROPERTY_CANISTER_ID);
-		applyDefault(exchange, merged, "didResource", CandidToolSchemaService.PROPERTY_DID_RESOURCE);
-		applyDefault(exchange, merged, "className", CandidToolSchemaService.PROPERTY_DEFAULT_POJO_CLASS);
-		return merged;
-	}
-
-	private void applyDefault(Exchange exchange, Map<String, Object> merged, String argumentName, String propertyName) {
-		if (hasValue(merged.get(argumentName))) {
-			return;
-		}
-		Object exchangeValue = exchange.getProperty(propertyName);
-		if (exchangeValue != null) {
-			merged.put(argumentName, exchangeValue);
-		}
-	}
-
-	private boolean hasValue(Object value) {
-		return value != null && !text(value).isBlank();
+	Map<String, Object> withDefaults(Exchange exchange, Map<String, Object> parameters) {
+		return SchemaArguments.configured(exchange, parameters);
 	}
 
 	private String text(Object value) {

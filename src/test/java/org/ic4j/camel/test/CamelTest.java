@@ -228,6 +228,73 @@ public final class CamelTest extends CamelTestSupport {
 		Assertions.assertEquals(42, response.get("foo").intValue());
 	}
 
+	/**
+	 * Opt-in regression coverage for a DFX-generated secp256k1 PEM against a
+	 * local replica. The Candid file is supplied explicitly so this tests the
+	 * signed query path without adding an authenticated metadata/loadIDL call.
+	 */
+	@Test
+	public void testCamelSignedSecp256k1QueryLocal() throws Exception {
+		Assumptions.assumeTrue(Boolean.parseBoolean(System.getProperty("ic4j.test.local.secp256k1", "false")),
+				"Local secp256k1 integration is disabled. Set -Dic4j.test.local.secp256k1=true to enable it.");
+
+		String url = requiredLocalProperty("ic4j.test.local.url");
+		String canisterId = requiredLocalProperty("ic4j.test.local.canister");
+		String pemFile = requiredLocalProperty("ic4j.test.local.pem");
+		String idlFile = requiredLocalProperty("ic4j.test.local.idl");
+
+		Assumptions.assumeTrue(Files.isRegularFile(Path.of(pemFile)), "Local secp256k1 PEM is unavailable");
+		Assumptions.assumeTrue(Files.isRegularFile(Path.of(idlFile)), "Local Candid file is unavailable");
+
+		String endpoint = "ic:query?url=" + url + "&method=get_status&canisterId=" + canisterId
+				+ "&identityType=secp256k1&pemFile=" + pemFile + "&idlFile=" + idlFile
+				+ "&outType=jackson&waiterTimeout=5&waiterSleep=1";
+
+			JsonNode response = template.requestBody(endpoint, null, JsonNode.class);
+			// IC4J's Jackson Candid decoder renders records as their Candid field-order array.
+			// get_status has authoritative at index 0 and fixture_only at index 8.
+			Assertions.assertTrue(response.isArray(), response.toPrettyString());
+			Assertions.assertFalse(response.get(0).booleanValue(), response.toPrettyString());
+			Assertions.assertTrue(response.get(8).booleanValue(), response.toPrettyString());
+	}
+
+	/**
+	 * Confirms that a secp256k1-signed update reaches the bridge authorization
+	 * boundary. The fixture gateway is deliberately not the bridge administrator,
+	 * so this must return Unauthorized and leave imports disabled.
+	 */
+	@Test
+	public void testCamelSignedSecp256k1UpdateLocalIsUnauthorized() throws Exception {
+		Assumptions.assumeTrue(Boolean.parseBoolean(System.getProperty("ic4j.test.local.secp256k1", "false")),
+				"Local secp256k1 integration is disabled. Set -Dic4j.test.local.secp256k1=true to enable it.");
+
+		String url = requiredLocalProperty("ic4j.test.local.url");
+		String canisterId = requiredLocalProperty("ic4j.test.local.canister");
+		String pemFile = requiredLocalProperty("ic4j.test.local.pem");
+		String idlFile = requiredLocalProperty("ic4j.test.local.idl");
+
+		Assumptions.assumeTrue(Files.isRegularFile(Path.of(pemFile)), "Local secp256k1 PEM is unavailable");
+		Assumptions.assumeTrue(Files.isRegularFile(Path.of(idlFile)), "Local Candid file is unavailable");
+
+		String statusEndpoint = "ic:query?url=" + url + "&method=get_status&canisterId=" + canisterId
+				+ "&identityType=secp256k1&pemFile=" + pemFile + "&idlFile=" + idlFile
+				+ "&outType=jackson&waiterTimeout=5&waiterSleep=1";
+		JsonNode before = template.requestBody(statusEndpoint, null, JsonNode.class);
+		long eventCountBefore = before.get(5).longValue();
+
+		String endpoint = "ic:update?url=" + url + "&method=set_imports_enabled&canisterId=" + canisterId
+				+ "&identityType=secp256k1&pemFile=" + pemFile + "&idlFile=" + idlFile
+				+ "&fetchRootKey=true&outType=jackson&waiterTimeout=5&waiterSleep=1";
+
+		JsonNode response = template.requestBody(endpoint, Boolean.FALSE, JsonNode.class);
+		// Result<(), BridgeError> is rendered as [[null]] by the current Jackson
+		// Candid decoder, so verify the authorization boundary through state instead.
+		Assertions.assertTrue(response.isArray(), response.toPrettyString());
+		JsonNode after = template.requestBody(statusEndpoint, null, JsonNode.class);
+		Assertions.assertFalse(after.get(7).booleanValue(), after.toPrettyString());
+		Assertions.assertEquals(eventCountBefore, after.get(5).longValue(), after.toPrettyString());
+	}
+
 	@Test
 	public void testCamelJacksonLoadIdlMapFails() {
 		assumeRemoteIntegrationEnabled();
@@ -247,13 +314,23 @@ public final class CamelTest extends CamelTestSupport {
 	}
 
 	private String getLocalSampleCanisterId() throws Exception {
-		Assumptions.assumeTrue(Files.exists(LOCAL_SAMPLE_CANISTER_IDS), "Local dfx sample is not deployed");
+		Assumptions.assumeTrue(Boolean.getBoolean("ic4j.test.local.sample"),
+				"Local sample integration is disabled. Set -Dic4j.test.local.sample=true to enable it.");
+		Path canisterIdsPath = Files.exists(LOCAL_SAMPLE_CANISTER_IDS) ? LOCAL_SAMPLE_CANISTER_IDS
+				: Path.of("..").resolve(LOCAL_SAMPLE_CANISTER_IDS);
+		Assumptions.assumeTrue(Files.exists(canisterIdsPath), "Local dfx sample is not deployed");
 
 		ObjectMapper mapper = new ObjectMapper();
-		JsonNode canisterIds = mapper.readTree(LOCAL_SAMPLE_CANISTER_IDS.toFile());
+		JsonNode canisterIds = mapper.readTree(canisterIdsPath.toFile());
 		JsonNode localCanister = canisterIds.path("motoko_sample").path("local");
 		Assumptions.assumeTrue(!localCanister.isMissingNode() && !localCanister.asText().isBlank(), "Local motoko_sample canister id is unavailable");
 		return localCanister.asText();
+	}
+
+	private String requiredLocalProperty(String name) {
+		String value = System.getProperty(name);
+		Assumptions.assumeTrue(value != null && !value.isBlank(), "Required local integration property is missing: " + name);
+		return value;
 	}
 
 	private boolean hasTestResource(String fileName) {
