@@ -88,3 +88,4 @@ for module, required in (
 PY
 
 bash camel/ci/run-kafka-smoke.sh
+bash camel/ci/run-mcp-http-smoke.sh

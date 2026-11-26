@@ -19,4 +19,8 @@ run against a disposable loopback Motoko canister. Remote tests and tests that
 require an external signed fixture are intentionally disabled. The Kafka 4.3.1 smoke sends one synthetic record
 through Camel to the local
 canister, confirms the update by query, and verifies one committed offset. It
-does not run the full IC4J Samples application or the MCP HTTP protocol.
+does not run the full IC4J Samples application.
+
+A separate smoke boots the shipped Motoko MCP YAML sample on loopback with
+the same job-local Maven artifacts. It checks the HTTP initialize handshake,
+tool discovery, and a greet mutation with independent readback.
