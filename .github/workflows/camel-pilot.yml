@@ -72,6 +72,8 @@ jobs:
           path: |
             ${{ runner.temp }}/ic4j-pilot-reports/
             ${{ runner.temp }}/camel-pilot-reports/
+            candid/build/test-results/test/TEST-*.xml
+            agent/build/test-results/test/TEST-*.xml
             dscope/target/surefire-reports/TEST-*.xml
             camel/ic4j-camel-core/target/surefire-reports/TEST-*.xml
             camel/ic4j-camel-mcp/target/surefire-reports/TEST-*.xml
