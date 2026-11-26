@@ -17,9 +17,9 @@ jobs:
     timeout-minutes: 30
     env:
       CANDID_REV: 35933a00ebfaeff6852010deed1633773c19b3a9
-      AGENT_REV: 91c425d240ca95187239df662fc8158b6fca234f
+      AGENT_REV: 67dd09c1eb18583834b7772dbca5515297cea853
       TRANSPORT_REV: e5314fa19bea47eb943e41f6cc6abee784593dcb
-      DSCOPE_REV: 3451a34a77ffc86c6856c082e3de791f9a978bec
+      DSCOPE_REV: b016db0025a14e98a61c2246ddf8f0aca021871e
       TEST_JAVA: '21'
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
