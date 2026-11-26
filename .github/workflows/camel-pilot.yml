@@ -21,7 +21,6 @@ jobs:
       TRANSPORT_REV: e5314fa19bea47eb943e41f6cc6abee784593dcb
       DSCOPE_REV: 3451a34a77ffc86c6856c082e3de791f9a978bec
       TEST_JAVA: '21'
-      CI_MAVEN_REPO: ${{ runner.temp }}/ic4j-maven
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
@@ -60,6 +59,8 @@ jobs:
           gradle-version: '8.14'
           cache-disabled: true
       - name: Build and test from pinned dependency sources
+        env:
+          CI_MAVEN_REPO: ${{ runner.temp }}/ic4j-maven
         run: bash camel/ci/run-camel-pilot.sh
       - name: Preserve reports and dependency evidence
         if: always()
