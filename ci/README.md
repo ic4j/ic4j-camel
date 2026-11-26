@@ -16,5 +16,6 @@ the pilot, review the upstream candidates and verify their accepted revisions.
 
 The reactor runs both Camel modules. The two Jackson/Candid integration tests
 run against a disposable loopback Motoko canister. Remote tests and tests that
-require an external signed fixture are intentionally disabled. This initial
-coverage does not validate a Kafka route or the MCP HTTP protocol.
+require an external signed fixture are intentionally disabled. The Kafka 4.3.1 smoke sends one synthetic record through Camel to the local
+canister, confirms the update by query, and verifies one committed offset. It
+does not run the full IC4J Samples application or the MCP HTTP protocol.

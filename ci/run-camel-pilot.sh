@@ -68,3 +68,7 @@ for module, required in (
     assert ran and required <= {c.attrib['name'] for c in ran}, f'Missing tests: {module}'
     print(f'{module}: {len(ran)} executed, {len(cases) - len(ran)} skipped')
 PY
+
+export IC4J_CI_CANISTER
+IC4J_CI_CANISTER="$(cd camel/samples/mcp-icp-motoko; dfx canister --network local id motoko_sample)"
+bash camel/ci/run-kafka-smoke.sh
