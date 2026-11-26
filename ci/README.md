@@ -24,3 +24,9 @@ does not run the full IC4J Samples application.
 A separate smoke boots the shipped Motoko MCP YAML sample on loopback with
 the same job-local Maven artifacts. It checks the HTTP initialize handshake,
 tool discovery, and a greet mutation with independent readback.
+
+The workflow also runs automatically when a PR targets `master`. It skips the
+integration suite only when every changed path is Markdown (including both paths
+for a rename), and runs the suite when changed-file information is incomplete.
+The named PR check reports a result in either case. Manual dispatch still
+runs the full suite.
