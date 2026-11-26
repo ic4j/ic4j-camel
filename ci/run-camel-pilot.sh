@@ -50,6 +50,16 @@ trap '(cd camel/samples/mcp-icp-motoko && dfx stop) >> "$reports/dfx-stop.log" 2
   dfx deploy --network local --identity anonymous --no-wallet motoko_sample
 ) 2>&1 | tee "$reports/dfx-start-deploy.log"
 
+export IC4J_CI_CANISTER
+IC4J_CI_CANISTER="$(cd camel/samples/mcp-icp-motoko; dfx canister --network local id motoko_sample)"
+[[ "$IC4J_CI_CANISTER" =~ ^[a-z0-9]+(-[a-z0-9]+)+$ ]]
+# Keep even the legacy route definitions away from public endpoints when
+# Camel initializes them in tests. Change only the throwaway CI checkout.
+cat > camel/src/test/resources/application.properties <<PROPERTIES
+ic.location=http://127.0.0.1:4943/
+ic.canister=$IC4J_CI_CANISTER
+PROPERTIES
+
 m -f camel/pom.xml -Dic4j.test.local.sample=true -Dic4j.test.remote=false \
   -Dic4j.test.local.secp256k1=false clean install | tee "$reports/camel-build.log"
 (cd "$CI_MAVEN_REPO"; sha256sum -c "$manifest")
@@ -69,6 +79,4 @@ for module, required in (
     print(f'{module}: {len(ran)} executed, {len(cases) - len(ran)} skipped')
 PY
 
-export IC4J_CI_CANISTER
-IC4J_CI_CANISTER="$(cd camel/samples/mcp-icp-motoko; dfx canister --network local id motoko_sample)"
 bash camel/ci/run-kafka-smoke.sh
