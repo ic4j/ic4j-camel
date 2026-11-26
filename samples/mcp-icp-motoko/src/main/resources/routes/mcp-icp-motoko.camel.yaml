@@ -1,7 +1,7 @@
 - route:
     id: mcp-icp-motoko
     from:
-      uri: mcp:http://0.0.0.0:3000/mcp
+      uri: "mcp:http://{{sample.mcp.bind}}/mcp"
       steps:
         - setProperty:
             name: icp.mcp.location
