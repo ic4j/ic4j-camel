@@ -41,17 +41,24 @@ export DFX_CONFIG_ROOT
 DFX_CONFIG_ROOT="$(mktemp -d "$RUNNER_TEMP/dfx-config.XXXXXX")"
 dfx --version | tee "$reports/dfx-version.txt"
 [[ "$(dfx --version)" == 'dfx 0.32.0' ]]
-trap '(cd camel/samples/mcp-icp-motoko && dfx stop) >> "$reports/dfx-stop.log" 2>&1 || true' EXIT
+fixture="$GITHUB_WORKSPACE/camel/samples/mcp-icp-motoko"
+trap '(cd "$fixture" && timeout 20s dfx stop) >> "$reports/dfx-stop.log" 2>&1 || true' EXIT
 (
-  cd camel/samples/mcp-icp-motoko
-  dfx start --host 127.0.0.1:4943 --background
+  cd "$fixture"
+  # Initialize only the disposable DFX config without logging its generated key.
+  timeout 20s dfx identity whoami </dev/null >/dev/null 2>&1
+  # The replica inherits these descriptors. Give it a regular file, not a
+  # pipe to tee that would stay open until the replica is stopped.
+  timeout 90s dfx start --host 127.0.0.1:4943 --background \
+    </dev/null >"$reports/dfx-start.log" 2>&1
   curl --fail --silent --show-error --retry 15 --retry-delay 1 --retry-connrefused --max-time 3 \
     http://127.0.0.1:4943/api/v2/status >/dev/null
-  dfx deploy --network local --identity anonymous --no-wallet motoko_sample
-) 2>&1 | tee "$reports/dfx-start-deploy.log"
+  timeout 120s dfx deploy --network local --identity anonymous --no-wallet motoko_sample \
+    2>&1 | tee "$reports/dfx-deploy.log"
+)
 
 export IC4J_CI_CANISTER
-IC4J_CI_CANISTER="$(cd camel/samples/mcp-icp-motoko; dfx canister --network local id motoko_sample)"
+IC4J_CI_CANISTER="$(cd "$fixture"; timeout 20s dfx canister --network local id motoko_sample)"
 [[ "$IC4J_CI_CANISTER" =~ ^[a-z0-9]+(-[a-z0-9]+)+$ ]]
 # Keep even the legacy route definitions away from public endpoints when
 # Camel initializes them in tests. Change only the throwaway CI checkout.
@@ -60,6 +67,7 @@ ic.location=http://127.0.0.1:4943/
 ic.canister=$IC4J_CI_CANISTER
 PROPERTIES
 
+printf '%s\n' "Replica ready: running the Camel reactor"
 m -f camel/pom.xml -Dic4j.test.local.sample=true -Dic4j.test.remote=false \
   -Dic4j.test.local.secp256k1=false clean install | tee "$reports/camel-build.log"
 (cd "$CI_MAVEN_REPO"; sha256sum -c "$manifest")
